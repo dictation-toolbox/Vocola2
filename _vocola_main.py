@@ -444,6 +444,7 @@ def compile_Vocola(inputFileOrFolder, force):
             os.remove(logName)
         except IOError:  # no log file means no Vocola errors
             pass
+    print('end of compile of vocola command files')
 
 # Unload all commands, including those of files no longer existing
 def purgeOutput():
