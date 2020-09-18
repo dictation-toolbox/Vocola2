@@ -1,14 +1,10 @@
 Keys.SendInput,1,1,1,vocola_ext_keys,vocola_ext_keys.send_input
+Pythonhelpers.MakeFormattedPrintLine,0,0,0,vocola_ext_pythonhelpers,vocola_ext_pythonhelpers.make_formatted_print_line
+String.GetName,1,1,0,vocola_ext_stringqh - kopie,vocola_ext_stringqh - kopie.getname
+String.GetPassword,1,1,0,vocola_ext_stringqh - kopie,vocola_ext_stringqh - kopie.getpassword
+String.NsformatCapitalize,1,1,0,vocola_ext_stringqh - kopie,vocola_ext_stringqh - kopie.nsformatcapitalize
+String.Capitalize,1,1,0,vocola_ext_stringqh - kopie,vocola_ext_stringqh - kopie.capitalize
 String.GetName,1,1,0,vocola_ext_stringqh,vocola_ext_stringqh.getname
 String.GetPassword,1,1,0,vocola_ext_stringqh,vocola_ext_stringqh.getpassword
 String.NsformatCapitalize,1,1,0,vocola_ext_stringqh,vocola_ext_stringqh.nsformatcapitalize
 String.Capitalize,1,1,0,vocola_ext_stringqh,vocola_ext_stringqh.capitalize
-Window.ID,0,0,0,vocola_ext_window_switching,vocola_ext_window_switching.window_ID
-Window.Title,0,0,0,vocola_ext_window_switching,vocola_ext_window_switching.window_title
-Window.Class,0,0,0,vocola_ext_window_switching,vocola_ext_window_switching.window_class
-Window.App,0,0,0,vocola_ext_window_switching,vocola_ext_window_switching.window_app
-Window.Match,1,1,0,vocola_ext_window_switching,vocola_ext_window_switching.window_match
-Window.Success,0,0,0,vocola_ext_window_switching,vocola_ext_window_switching.window_success
-Window.Go_,1,1,1,vocola_ext_window_switching,vocola_ext_window_switching.window_go_
-Window.Go,1,1,1,vocola_ext_window_switching,vocola_ext_window_switching.window_go
-Window.ListWindows,0,1,1,vocola_ext_window_switching,vocola_ext_window_switching.list_windows

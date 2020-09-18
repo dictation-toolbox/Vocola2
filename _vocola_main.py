@@ -52,8 +52,13 @@ try:
     import natlinkstatus
     Quintijn_installer = True
     status             = natlinkstatus.NatlinkStatus()
-    print('status: %s'% status)
+    # print('status: %s'% status)
     VocolaEnabled      = not not status.getVocolaUserDirectory()
+    print(f'VocolaEnabled: {VocolaEnabled}')
+    if VocolaEnabled:
+        VocolaGrammarsDirecory = status.getVocolaGrammarsDirectory()
+        VocolaUserDirectory = status.getVocolaUserDirectory()
+        VocolaDirectory = status.getVocolaDirectory()
     # print('VocolaEnabled: %s'% VocolaEnabled)
     language           = status.getLanguage()
     if language != 'enx':
@@ -66,7 +71,10 @@ except ImportError:
 
 thisDir = os.path.split(__file__)[0]
 if thisDir and os.path.isdir(thisDir):
-    print(f"thisDir _vocola_main: {thisDir}")
+    pass
+    if VocolaEnabled:
+        if True:   #VocolaDirectory == thisDir:
+            print(f"thisDir of _vocola_main: {thisDir} not equal to VocolaDirectory from natlinkstatus: {VocolaDirectory}")
 else:
     raise IOError("no valid directory found for _vocola_main.py: {thisDir}")
     
@@ -82,10 +90,14 @@ ExtensionsFolder = os.path.normpath(os.path.join(thisDir, 'extensions'))
 # NatlinkFolder = os.path.abspath(NatlinkFolder)
 
 if VocolaEnabled:
+    print('_vocola_main, Vocola is Enabled, check sys.path for ExecFolder and ExtensionsFolder')
     for f in ExecFolder, ExtensionsFolder:
         if f not in sys.path:
+            print(f'_vocola_main, add to sys.path: {f}')
             sys.path.append(f)
-
+else:
+    print('_vocola_main, Vocola is NOT Enabled')
+    
 
 def get_command_folder():
     commandFolder = get_top_command_folder()
@@ -96,30 +108,31 @@ def get_command_folder():
     return commandFolder
 
 def get_top_command_folder():
-    configured = None
-    try:
-        import natlinkstatus
-        # Quintijn's's installer:
-        configured = natlinkstatus.NatlinkStatus().getVocolaUserDirectory()
-        # print('Vocola configured: %s'% configured)
-    except ImportError:
-        try:
-            import RegistryDict
-            import win32con
-            # Scott's installer:
-            r = RegistryDict.RegistryDict(win32con.HKEY_CURRENT_USER,r"Software\Natlink")
-            if r:
-                configured = r["VocolaUserDirectory"]
-        except ImportError:
-            pass
-    if os.path.isdir(configured):
-        return configured
-
-    systemCommandFolder = os.path.join(VocolaFolder, 'Commands')
-    if os.path.isdir(systemCommandFolder):
-        return systemCommandFolder
-
-    return None
+    return VocolaUserDirectory
+    # configured = None
+    # try:
+    #     import natlinkstatus
+    #     # Quintijn's's installer:
+    #     configured = status.NatlinkStatus().getVocolaUserDirectory()
+    #     # print('Vocola configured: %s'% configured)
+    # except ImportError:
+    #     try:
+    #         import RegistryDict
+    #         import win32con
+    #         # Scott's installer:
+    #         r = RegistryDict.RegistryDict(win32con.HKEY_CURRENT_USER,r"Software\Natlink")
+    #         if r:
+    #             configured = r["VocolaUserDirectory"]
+    #     except ImportError:
+    #         pass
+    # if os.path.isdir(configured):
+    #     return configured
+    # 
+    # systemCommandFolder = os.path.join(VocolaFolder, 'Commands')
+    # if os.path.isdir(systemCommandFolder):
+    #     return systemCommandFolder
+    # 
+    # return None
 
 commandFolder = get_command_folder()
 if VocolaEnabled and not commandFolder:
@@ -296,7 +309,7 @@ Commands" are activated.
     # Load all command files
     def loadAllFiles(self, force):
         if commandFolder:
-            print('loadAllFiles: %s'% commandFolder)
+            # print('loadAllFiles: %s'% commandFolder)
             compile_Vocola(commandFolder, force)
 
     # Load command files for specific application
@@ -429,8 +442,9 @@ def compile_Vocola(inputFileOrFolder, force):
 
     arguments += ["-suffix", "_vcl"]
     if force: arguments += ["-f"]
-    arguments += [inputFileOrFolder, NatlinkFolder]
-    print(f"_vocola_main calls vcl2py.py, grammars go to folder: {NatlinkFolder}")
+    # arguments += [inputFileOrFolder, NatlinkFolder]
+    arguments += [inputFileOrFolder, VocolaGrammarsDirecory]
+    print(f"_vocola_main calls vcl2py.py, grammars go to folder: {VocolaGrammarsDirecory}")
     # print(f"calling {arguments}")
     hidden_call(executable, arguments)
 
@@ -444,7 +458,6 @@ def compile_Vocola(inputFileOrFolder, force):
             os.remove(logName)
         except IOError:  # no log file means no Vocola errors
             pass
-    print('end of compile of vocola command files')
 
 # Unload all commands, including those of files no longer existing
 def purgeOutput():
