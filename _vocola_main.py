@@ -38,9 +38,10 @@ import time             # print time in messages
 from   stat import *    # file statistics
 import re
 import natlink
+import natlinkmain
 from   natlinkutils import *
 
-
+thisDir = os.path.split(__file__)[0]
 
 ##########################################################################
 #                                                                        #
@@ -69,7 +70,6 @@ except ImportError:
     VocolaEnabled      = True
     language           = 'enx'
 
-thisDir = os.path.split(__file__)[0]
 if thisDir and os.path.isdir(thisDir):
     pass
     if VocolaEnabled:
@@ -260,8 +260,13 @@ Commands" are activated.
 
     # Get app name by stripping folder and extension from currentModule name
     def getCurrentApplicationName(self):
-        return os.path.splitext(
-            os.path.split(self.currentModule[0]) [1]) [0].lower()
+        """get the current application name of the foreground window
+        
+        The same named function in natlinkmain returns the lowercase executable of the running
+        program, but if "ApplicationFrameHost" is running (Calc, Photos), that name is returned.
+        """
+        appName = natlinkmain.getCurrentApplicationName(self.currentModule)
+        return appName
 
 
 ### Miscellaneous commands
