@@ -1,0 +1,2 @@
+To create the package for upload to PyPy etc,
+run the powershell script build_package.ps1
