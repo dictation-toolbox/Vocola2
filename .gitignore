@@ -1,2 +1,4 @@
 *.pyc
 /extensions/debug.log
+/dist
+/__pycache__
