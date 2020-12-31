@@ -32,6 +32,7 @@ SOFTWARE.
 """
 
 import sys
+import traceback
 import os               # access to file information
 import os.path          # to parse filenames
 import time             # print time in messages
@@ -60,6 +61,11 @@ try:
         VocolaGrammarsDirecory = status.getVocolaGrammarsDirectory()
         VocolaUserDirectory = status.getVocolaUserDirectory()
         VocolaDirectory = status.getVocolaDirectory()
+    else:
+        VocolaGrammarsDirecory = ""
+        VocolaUserDirectory = ""
+        VocolaDirectory = ""
+        
     # print('VocolaEnabled: %s'% VocolaEnabled)
     language           = status.getLanguage()
     if language != 'enx':
@@ -69,6 +75,7 @@ except ImportError:
     Quintijn_installer = False
     VocolaEnabled      = True
     language           = 'enx'
+    traceback.print_exc()
 
 if thisDir and os.path.isdir(thisDir):
     pass
