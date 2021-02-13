@@ -37,6 +37,7 @@ import os               # access to file information
 import os.path          # to parse filenames
 import time             # print time in messages
 from   stat import *    # file statistics
+import shutil
 import re
 import natlink
 import natlinkmain
@@ -80,7 +81,7 @@ except ImportError:
 if thisDir and os.path.isdir(thisDir):
     pass
     if VocolaEnabled:
-        if True:   #VocolaDirectory == thisDir:
+        if VocolaDirectory != thisDir:
             print(f"thisDir of _vocola_main: {thisDir} not equal to VocolaDirectory from natlinkstatus: {VocolaDirectory}")
 else:
     raise IOError("no valid directory found for _vocola_main.py: {thisDir}")
@@ -92,7 +93,40 @@ NatlinkFolder = os.path.normpath(os.path.join(CoreDirectory, ".."))
 
 VocolaFolder     = thisDir
 ExecFolder       = os.path.normpath(os.path.join(thisDir, 'exec'))
-ExtensionsFolder = os.path.normpath(os.path.join(thisDir, 'extensions'))
+OriginalExtensionsFolder = os.path.normpath(os.path.join(thisDir, 'extensions'))
+ExtensionsFolder = os.path.normpath(os.path.join(VocolaUserDirectory, 'extensions'))
+
+def checkExtensionsFolderContents(original, actual):
+    """create the actual extensions folder and check the contents
+    
+    the actual extensionsfolder  should be a subdirectory of the VocolaUserDirectory
+    and is created if not existing yet.
+    
+    All the python files in the original folder are copied to the thisactual folder, if needed.
+    
+    """
+    if not os.path.isdir(actual):
+        os.mkdir(actual)
+    if not os.path.isdir(actual):
+        raise IOError(f'Vocola2: the "actual" extensions folder {actual} could not be created')
+    filesToCopyIfNewer = [f for f in os.listdir(original) if f.endswith('.py')]
+    filesToCopyIfNewer.append('README.txt')
+    
+    for name in filesToCopyIfNewer:
+        orgPy = os.path.join(original, name)
+        targetPy = os.path.join(actual, name)
+        orgDate = vocolaGetModTime(orgPy)
+        targetDate = vocolaGetModTime(targetPy)
+        if orgDate > targetDate:
+            shutil.copyfile(orgPy, targetPy)
+                       
+# Returns the modification time of a file or 0 if the file does not exist:
+def vocolaGetModTime(file):
+    try: return os.stat(file)[ST_MTIME]
+    except OSError: return 0        # file not found
+
+
+checkExtensionsFolderContents(OriginalExtensionsFolder, ExtensionsFolder)
 
 # NatlinkFolder = os.path.abspath(NatlinkFolder)
 
