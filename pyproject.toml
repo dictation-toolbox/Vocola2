@@ -10,7 +10,7 @@ home-page = "https://github.com/dictation-toolbox/unimacro"
 description-file = "README.md"
 module="vocola2"
 requires=["unimacro",
-			"natlinkpy"]
+			"natlink"]
 		  
 		
 classifiers=[	"Development Status :: 4 - Beta",
