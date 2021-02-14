@@ -4,14 +4,15 @@ build-backend = "flit_core.buildapi"
 
 [tool.flit.metadata]
 
-author = "quintijn"
-author-email = "quintijn@me.uk"
-home-page = "https://github.com/dictation-toolbox/unimacro"
+author = "Mark Lillibridge"
+author-email = "mdl@alum.mit.edu"
+maintainer = "Quintijn Hoogenboom"
+maintainer-email = "q.hoogenboom@antenna.nl"
+home-page = "http://vocola.net/v2/"
 description-file = "README.md"
 module="vocola2"
 requires=["unimacro",
-			"natlink"]
-		  
+          "natlink"]
 		
 classifiers=[	"Development Status :: 4 - Beta",
 				"Topic :: Multimedia :: Sound/Audio :: Speech",
