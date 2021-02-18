@@ -490,7 +490,7 @@ def compile_Vocola(inputFileOrFolder, force):
     if force: arguments += ["-f"]
     # arguments += [inputFileOrFolder, NatlinkFolder]
     arguments += [inputFileOrFolder, VocolaGrammarsDirecory]
-    print(f"_vocola_main calls vcl2py.py, grammars go to folder: {VocolaGrammarsDirecory}")
+    # print(f"_vocola_main calls vcl2py.py, grammars go to folder: {VocolaGrammarsDirecory}")
     # print(f"calling {arguments}")
     hidden_call(executable, arguments)
 
