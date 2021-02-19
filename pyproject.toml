@@ -20,7 +20,7 @@ classifiers=[	"Development Status :: 4 - Beta",
 				]
 				
 requires-python = ">=3.8"
-keywords="dragon,speech,dictation,dictation-toolobx,unimacro,natlink"
+keywords="dragon,speech,dictation,dictation-toolbox,unimacro,natlink"
 
 [tool.flit.scripts]
 
