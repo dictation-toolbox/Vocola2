@@ -227,7 +227,7 @@ def call_Dragon(function_name, argument_types, arguments):
 # attempt to import Unimacro, suppressing errors, and noting success status:
 unimacro_available = False
 try:
-    import actions
+    import unimacro.actions
     unimacro_available = True
 except ImportError:
     pass

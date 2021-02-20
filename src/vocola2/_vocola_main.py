@@ -88,8 +88,7 @@ else:
     
 
 # get location of MacroSystem folder:
-CoreDirectory = status.getCoreDirectory()
-NatlinkFolder = os.path.normpath(os.path.join(CoreDirectory, ".."))
+NatlinkDirectory = status.getNatlinkDirectory()
 
 VocolaFolder     = thisDir
 ExecFolder       = os.path.normpath(os.path.join(thisDir, 'exec'))
@@ -127,8 +126,6 @@ def vocolaGetModTime(file):
 
 
 checkExtensionsFolderContents(OriginalExtensionsFolder, ExtensionsFolder)
-
-# NatlinkFolder = os.path.abspath(NatlinkFolder)
 
 if VocolaEnabled:
     print('_vocola_main, Vocola is Enabled, check sys.path for ExecFolder and ExtensionsFolder')
@@ -488,7 +485,6 @@ def compile_Vocola(inputFileOrFolder, force):
 
     arguments += ["-suffix", "_vcl"]
     if force: arguments += ["-f"]
-    # arguments += [inputFileOrFolder, NatlinkFolder]
     arguments += [inputFileOrFolder, VocolaGrammarsDirecory]
     # print(f"_vocola_main calls vcl2py.py, grammars go to folder: {VocolaGrammarsDirecory}")
     # print(f"calling {arguments}")
@@ -508,8 +504,8 @@ def compile_Vocola(inputFileOrFolder, force):
 # Unload all commands, including those of files no longer existing
 def purgeOutput():
     pattern = re.compile("_vcl\d*\.pyc?$")
-    [os.remove(os.path.join(NatlinkFolder,f)) for f
-     in os.listdir(NatlinkFolder) if pattern.search(f)]
+    [os.remove(os.path.join(NatlinkDirectory,f)) for f
+     in os.listdir(NatlinkDirectory) if pattern.search(f)]
 
 #
 # Run program with path executable and arguments arguments.  Waits for
@@ -572,14 +568,14 @@ def vocolaGetModTime(file):
 
 def deleteOrphanFiles():
     print("checking for orphans...")
-    for f in os.listdir(NatlinkFolder):
+    for f in os.listdir(NatlinkDirectory):
         if not re.search("_vcl.pyc?$", f): continue
 
         s = getSourceFilename(f)
         if s:
             if vocolaGetModTime(s)>0: continue
 
-        f = os.path.join(NatlinkFolder, f)
+        f = os.path.join(NatlinkDirectory, f)
         print("Deleting: " + f)
         os.remove(f)
 
@@ -615,7 +611,7 @@ def output_changes():
     old_may_have_compiled = may_have_compiled
     may_have_compiled = False
 
-    current = vocolaGetModTime(NatlinkFolder)
+    current = vocolaGetModTime(NatlinkDirectory)
     if current > lastNatLinkModTime:
         lastNatLinkModTime = current
         return 2
