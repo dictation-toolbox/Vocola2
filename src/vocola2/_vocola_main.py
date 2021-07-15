@@ -120,6 +120,12 @@ def checkExtensionsFolderContents(original, actual):
         targetDate = vocolaGetModTime(targetPy)
         if orgDate > targetDate:
             shutil.copyfile(orgPy, targetPy)
+
+# Returns the modification time of a file or 0 if the file does not exist:
+def vocolaGetModTime(file):
+    try: return os.stat(file)[stat.ST_MTIME]
+    except OSError: return 0        # file not found
+
                        
 checkExtensionsFolderContents(OriginalExtensionsFolder, ExtensionsFolder)
 
@@ -556,12 +562,6 @@ def getLastVocolaFileModTime():
                    [vocolaGetModTime(os.path.join(commandFolder,f))
                     for f in os.listdir(commandFolder)])
     return last
-
-# Returns the modification time of a file or 0 if the file does not exist:
-def vocolaGetModTime(file):
-    try: return os.stat(file)[stat.ST_MTIME]
-    except OSError: return 0        # file not found
-
 
 def deleteOrphanFiles():
     print("checking for orphans...")
