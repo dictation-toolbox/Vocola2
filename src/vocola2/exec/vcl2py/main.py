@@ -128,7 +128,7 @@ def main_routine():
     else:
         try:
             set_log(open(log_file, "w"))
-        except IOError as e:
+        except OSError as e:
             fatal_error("Unable to open log file '" + log_file +
                         "' for writing: " + str(e))
 
@@ -171,7 +171,7 @@ def read_ini_file(ini_file):
             value   = match.group(2)
             if keyword == "MaximumCommands":
                 Default_maximum_commands = safe_int(value, 1)
-    except IOError as e:
+    except OSError as e:
         return
 
 def read_extensions_file(extensions_filename):
@@ -193,7 +193,7 @@ def read_extensions_file(extensions_filename):
             function_name     = match.group(6)
 
             extension_functions[extension_name] = [minimum_arguments, maximum_arguments, needs_flushing, module_name, function_name]
-    except IOError as e:
+    except OSError as e:
         pass
     return extension_functions
 
@@ -216,7 +216,7 @@ def expand_in_file(in_file, in_folder):
                 if not (match and match.group(1).lower() != machine):
                     result += [in_file]
         return result
-    except IOError as e:
+    except OSError as e:
         fatal_error("Couldn't open/list folder '" + in_folder + "': " + str(e))
 
 
@@ -308,7 +308,7 @@ def convert_file(in_file, out_folder, suffix):
         try:
             OUT = open(out_file, "w")
             OUT.close()
-        except IOError as e:
+        except OSError as e:
             print_log("Couldn't open output file '" + out_file + "' for writing")
         print_log("Converting " + Input_name)
         print_log("  Warning: no commands in file.")

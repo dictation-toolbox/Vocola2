@@ -38,7 +38,7 @@ def emit_output(out_file, statements):
     global Should_emit_dictation_support, OUT
     try:
         OUT = open(out_file, "w")
-    except IOError as e:
+    except OSError as e:
         log_error("Unable to open output file '" + out_file + \
                   "' for writing: " + str(e))
         return

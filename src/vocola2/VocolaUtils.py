@@ -231,7 +231,7 @@ try:
     unimacro_available = True
 except ImportError:
     pass
-except IOError:
+except OSError:
     # print 'cannot open Unimacro actions file'
     pass
 

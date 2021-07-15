@@ -197,7 +197,7 @@ def read_file(in_file):
     global Last_include_position
     try:
         return open(in_file).read()
-    except (IOError, OSError) as e:
+    except OSError as e:
         log_error("Unable to open or read '" + in_file + "'", # + ": " + str(e),
                   Last_include_position)
         return ""
