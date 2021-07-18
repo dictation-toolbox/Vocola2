@@ -1,6 +1,6 @@
 """Vocola"""
 
-__version__ = '0.1.0.5'
+__version__ = '0.1.0.51'  # test versions Quintijn python3
 
 
 
