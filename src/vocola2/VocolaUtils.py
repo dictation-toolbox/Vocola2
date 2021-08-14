@@ -104,7 +104,7 @@ def handle_error(filename, line, command, exception):
     print("the following error occurred:", file=sys.stderr)
     print("    " + exception.__class__.__name__ + ": " \
         + str(exception), file=sys.stderr)
-    #traceback.print_exc()
+    traceback.print_exc()
     #raise exception
 
 
@@ -122,10 +122,10 @@ def do_flush(functional_context, buffer):
             'attempt to call Unimacro, Dragon, or a Vocola extension ' +
             'procedure in a functional context!')
     if buffer != '':
+        new_keys = convert_keys(buffer)
+        print(f'buffer: "{buffer}", new_keys: "{new_keys}"')
         natlinkutils.playString(convert_keys(buffer))
     return ''
-
-
 
 ##
 ## Dragon built-ins:
@@ -227,7 +227,7 @@ def call_Dragon(function_name, argument_types, arguments):
 # attempt to import Unimacro, suppressing errors, and noting success status:
 unimacro_available = False
 try:
-    import unimacro.actions
+    from unimacro import actions
     unimacro_available = True
 except ImportError:
     pass
