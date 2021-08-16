@@ -504,12 +504,15 @@ def compile_Vocola(inputFileOrFolder, force):
 
 # Unload all commands, including those of files no longer existing
 def purgeOutput():
-    print('purge output, directory: {VocolaGrammarsDirecory} {len(os.listdir(VocolaGrammarsDirecory))} files')
+    # print(f'purge output, directory: {VocolaGrammarsDirecory} {len(os.listdir(VocolaGrammarsDirecory))} files')
     # pattern = re.compile(r"_vcl\d*\.pyc?$")
+    nFiles = 0
     for f in os.listdir(VocolaGrammarsDirectory):
-        os.remove(os.path.join(VocolaGrammarsDirectory, f))
-    print('purged output, directory: {VocolaGrammarsDirecory} {len(os.listdir(VocolaGrammarsDirecory))} files')
-    print('-------------------')
+        if f.endswith('.py'):
+            nFiles += 1
+            os.remove(os.path.join(VocolaGrammarsDirectory, f))
+    # print('purged output, directory: {VocolaGrammarsDirecory}, {nFiles} python files')collapse
+    # print('-------------------')
 
 #
 # Run program with path executable and arguments arguments.  Waits for
