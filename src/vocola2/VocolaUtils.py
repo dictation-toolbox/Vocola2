@@ -28,13 +28,14 @@
 ### DEALINGS IN THE SOFTWARE.
 ###
 #pylint:disable=C0116, C0114, C0115, R0911
+#pylint:disable=E1101
 
 import re
 import sys
 import traceback  # for debugging traceback code in handle_error
 
-from natlinkcore import natlink
-from natlinkcore import natlinkutils
+import natlink
+from natlink import natlinkutils
 
 ##
 ## Global variables:
@@ -120,8 +121,8 @@ def do_flush(functional_context, buffer):
             'attempt to call Unimacro, Dragon, or a Vocola extension ' +
             'procedure in a functional context!')
     if buffer != '':
-        new_keys = convert_keys(buffer)
-        print(f'buffer: "{buffer}", new_keys: "{new_keys}"')
+        # new_keys = convert_keys(buffer)
+        # print(f'buffer: "{buffer}", new_keys: "{new_keys}"')
         natlinkutils.playString(convert_keys(buffer))
     return ''
 

@@ -9,7 +9,7 @@ import stat
 import re
 import shutil
 import sys
-import natlinkstatus
+from natlink import natlinkstatus
 status = natlinkstatus.NatlinkStatus()
 #
 # This function is called by natlinkmain when starting up just before
@@ -91,7 +91,7 @@ def create_new_language_subdirectory_if_needed():
     the option VocolaTakesLanguages is set.
     """
     VocolaEnabled = bool(status.getVocolaUserDirectory())
-    language      = status.getLanguage()
+    language      = status.language
     commandFolder = status.getVocolaUserDirectory()
     if not os.path.isdir(commandFolder):                      
         commandFolder = None
@@ -123,7 +123,7 @@ def copyVclFileLanguageVersion(Input, Output):
     Output    = os.path.normpath(Output)
     inputString = open(Input, 'r').read()
     output    = open(Output, 'w')
-    language      = status.getLanguage()
+    language      = status.language
     output.write("# vocola file for alternate language: %s\n"% language)
     lines = list(map(lambda s: s.strip(), inputString.split('\n')))
     for line in lines:
