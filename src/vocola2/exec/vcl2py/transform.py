@@ -1,6 +1,6 @@
 import copy
 
-from vcl2py.ast import *
+from vocola2.exec.vcl2py.ast import *
 
 
 def transform(nodes,

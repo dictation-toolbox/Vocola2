@@ -1,5 +1,5 @@
 import re
-from vcl2py.ast import *
+from vocola2.exec.vcl2py.ast import *
 
 log_error = None   # temporary kludge
 

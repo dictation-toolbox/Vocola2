@@ -1,9 +1,9 @@
 import re
 import os
 
-from vcl2py.ast import *
-from vcl2py.lex import *
-from vcl2py.log import *
+from vocola2.exec.vcl2py.ast import *
+from vocola2.exec.vcl2py.lex import *
+from vocola2.exec.vcl2py.log import *
 
 
 def parse_input(in_file, in_folder, extension_functions, debug):
@@ -886,7 +886,7 @@ def check_forward_references():
 
 
 
-import vcl2py.lex as lex
+import vocola2.exec.vcl2py.lex as lex
 lex.log_error = log_error  # temporary kludge
-import vcl2py.emit as emit
+import vocola2.exec.vcl2py.emit as emit
 emit.log_error = log_error  # temporary kludge

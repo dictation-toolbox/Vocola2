@@ -45,6 +45,7 @@ import natlink
 from natlink import natlinkutils
 import VocolaUtils
 import natlinkvocolastartup  # was natlinkstartup in natlinkmain...
+from vocola2.exec.vcl2py.main import main_routine     # main.main_routine  compile function
 import __init__
 
 thisDir = os.path.split(__file__)[0]
@@ -78,8 +79,7 @@ try:
         print(f'    language: "{language}"')
         if status.getVocolaTakesLanguages():
             VocolaUserLanguageDirectory = os.path.join(VocolaUserDirectory, language)
-            print(f'    VocolaUserLanguageDirectory is now: "{VocolaUserDirectory}"')
-        
+            print(f'    VocolaUserLanguageDirectory: "{VocolaUserLanguageDirectory}"')
     ## perform init actions:
     natlinkvocolastartup.start()
 except ImportError:
@@ -95,14 +95,22 @@ if thisDir and os.path.isdir(thisDir):
 else:
     raise OSError("no valid directory found for _vocola_main.py: {thisDir}")
     
-# get location of MacroSystem folder:
-VocolaGrammarsDirectory = status.getVocolaGrammarsDirectory()
-print(f'VocolaUserLanguageDirectory: "{VocolaUserLanguageDirectory}"')
-
 VocolaFolder     = thisDir
 ExecFolder       = os.path.normpath(os.path.join(thisDir, 'exec'))
 OriginalExtensionsFolder = os.path.normpath(os.path.join(thisDir, 'extensions'))
 ExtensionsFolder = os.path.normpath(os.path.join(VocolaUserDirectory, 'extensions'))
+
+def get_command_folder(command_folder):
+    global commandFolder
+    commandFolder = VocolaUserLanguageDirectory
+    # if commandFolder: 
+    #     uDir = os.path.join(commandFolder, language)
+    #     if os.path.isdir(uDir):
+    #         commandFolder = uDir
+    return VocolaUserLanguageDirectory
+
+commandFolder = ''    # set in get_command_folder(). 
+commandFolder = get_command_folder(VocolaUserLanguageDirectory)
 
 def checkExtensionsFolderContents(original, actual):
     """create the actual extensions folder and check the contents
@@ -142,47 +150,6 @@ if VocolaEnabled:
             sys.path.append(_f)
 else:
     print('_vocola_main, Vocola is NOT Enabled')
-    
-
-def get_command_folder():
-    global commandFolder
-    commandFolder = VocolaUserLanguageDirectory
-    # if commandFolder: 
-    #     uDir = os.path.join(commandFolder, language)
-    #     if os.path.isdir(uDir):
-    #         commandFolder = uDir
-    return VocolaUserLanguageDirectory
-# 
-# def get_top_command_folder():
-#     return VocolaUserDirectory
-#     # configured = None
-#     # try:
-#     #     from natlinkcore import natlinkstatus
-#     #     # Quintijn's's installer:
-#     #     configured = status.NatlinkStatus().getVocolaUserDirectory()
-#     #     # print('Vocola configured: %s'% configured)
-#     # except ImportError:
-#     #     try:
-#     #         import RegistryDict
-#     #         import win32con
-#     #         # Scott's installer:
-#     #         r = RegistryDict.RegistryDict(win32con.HKEY_CURRENT_USER,r"Software\Natlink")
-#     #         if r:
-#     #             configured = r["VocolaUserDirectory"]
-#     #     except ImportError:
-#     #         pass
-#     # if os.path.isdir(configured):
-#     #     return configured
-#     # 
-#     # systemCommandFolder = os.path.join(VocolaFolder, 'Commands')
-#     # if os.path.isdir(systemCommandFolder):
-#     #     return systemCommandFolder
-#     # 
-#     # return None
-# 
-# commandFolder = get_command_folder()
-# if VocolaEnabled and not commandFolder:
-#     print("Warning: no Vocola command folder found!", file=sys.stderr)
 
 VocolaUtils.Language = language
 
@@ -492,9 +459,10 @@ def compile_Vocola(inputFileOrFolder, force=None):
     force = force or False
     may_have_compiled = True
 
-    executable = sys.prefix + r'\python.exe'
-    arguments  = [VocolaFolder + r'\exec\vcl2py.py']
+    # executable = sys.prefix + r'\python.exe'
+    # arguments  = [VocolaFolder + r'\exec\vcl2py.py']
 
+    arguments = []
     arguments += ['-extensions', ExtensionsFolder + r'\extensions.csv']
     if language == "enx":
         arguments += ['-numbers',
@@ -503,20 +471,24 @@ def compile_Vocola(inputFileOrFolder, force=None):
     arguments += ["-suffix", "_vcl"]
     if force: arguments += ["-f"]
     arguments += [inputFileOrFolder, VocolaGrammarsDirectory]
-    # print(f"_vocola_main calls vcl2py.py, grammars go to folder: {VocolaGrammarsDirecory}")
-    # print(f"calling {arguments}")v
-    hidden_call(executable, arguments)
-
-    logName = commandFolder + r'\vcl2py_log.txt'
-    if os.path.isfile(logName):
-        try:
-            log = open(logName, 'r')
-            compiler_error = True
-            print(log.read(), file=sys.stderr)
-            log.close()
-            os.remove(logName)
-        except OSError:  # no log file means no Vocola errors
-            pass
+    # print(f'_vocola_main calls vcl2py.py, grammars go to folder: {VocolaGrammarsDirectory}')
+    # print(f'calling executable: {executable}')
+    # print(f'calling main with arguments: {arguments}')
+    #======================
+    main_routine(arguments)
+    #======================
+    # hidden_call(executable, arguments)
+    # 
+    # logName = commandFolder + r'\vcl2py_log.txt'
+    # if os.path.isfile(logName):
+    #     try:
+    #         log = open(logName, 'r')
+    #         compiler_error = True
+    #         print(log.read(), file=sys.stderr)
+    #         log.close()
+    #         os.remove(logName)
+    #     except OSError:  # no log file means no Vocola errors
+    #         pass
 
 # Unload all commands, including those of files no longer existing
 def purgeOutput():
