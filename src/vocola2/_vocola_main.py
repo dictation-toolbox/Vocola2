@@ -45,6 +45,8 @@ import natlink
 from natlink import natlinkutils
 import VocolaUtils
 import natlinkvocolastartup  # was natlinkstartup in natlinkmain...
+import __init__
+
 thisDir = os.path.split(__file__)[0]
 
 ##########################################################################
@@ -689,7 +691,7 @@ purgeOutput()
 if not VocolaEnabled:
     print("Vocola not active")
 else:
-    print("Vocola version 2.9.0 starting...")
+    print(f'Vocola version "{__init__.__version__}" starting...')
     thisGrammar = ThisGrammar()
     thisGrammar.initialize()
 

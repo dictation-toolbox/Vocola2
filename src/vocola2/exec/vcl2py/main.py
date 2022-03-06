@@ -11,10 +11,7 @@ from vcl2py.lex       import initialize_token_properties
 from vcl2py.log       import *
 from vcl2py.parse     import parse_input, check_forward_references
 from vcl2py.transform import transform
-
-
-VocolaVersion = "2.9.0"
-
+from vocola2.__init__ import __version__ as VocolaVersion
 
 # ---------------------------------------------------------------------------
 # Messages to standard error
@@ -37,7 +34,7 @@ Usage: python vcl2py.pl [<option>...] <inputFileOrFolder> <outputFolder>
                   | -max_commands <n> | -q | -suffix <s>
 
 ''', file=sys.stderr)
-    print("Vocola 2 version: " + VocolaVersion, file=sys.stderr)
+    print("Vocola2 version: " + VocolaVersion, file=sys.stderr)
     sys.exit(99)
 
 

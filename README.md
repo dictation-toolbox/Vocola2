@@ -82,24 +82,37 @@ line count reduction of roughly 6:1) and at this writing use well over
 
 ## Installation
 
-Natlink and Vocola2 have been upgraded to Python 3 fom Python 2.
+Natlink and Vocola2 have been upgraded to Python 3
 
-The current Vocola2 Unimacro is stable, but not yet released.  Install from the [Test Python Package Index](https://test.pypi.org/)
-with the following.
+-First install Natlink to the latest version.
 
-`pip install --no-cache --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple vocola2`
+The current Vocola2 is partly stable, and can be installed via pip:
+-pip install vocola2
 
 Instructions for installing the latest released version can be found at
 http://vocola.net/v2/InstallVocola.asp
 
+##Instructions for the developers
+
 To install the version checked out in your git repository,
-uininstall vocoal 
+-first uninstall vocola:
 `pip uninstall vocola2`
 
-In your root of your repository:  
-`build_package
-flit install --symlink`
+-In your root of your repository:  
+`build_package`
+`flit install --symlink`
 
+-You can now edit the files in your (Forked) repository, the changes will reflect the state of
+you packages in the site-packages directory immediately. You need to restart Dragon quite often though.
+
+-When you are satisfied with a release, take the following steps:
+-change the release number in __init__.py of vocola2.
+-do a local `pip uninstall vocola2`
+-commit and push your git directory
+
+Then: 
+-`build_package`  (`.ps1` for powershell or `.cmd` for cmd shell)
+-`publish_package_pypi` (`.ps1` or `.cmd`)
 
 
 ## Tests
