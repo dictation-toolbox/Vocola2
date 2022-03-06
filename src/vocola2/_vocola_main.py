@@ -72,9 +72,14 @@ try:
         VocolaDirectory = ""
         
     # print('VocolaEnabled: %s'% VocolaEnabled)
+    VocolaUserLanguageDirectory = VocolaUserDirectory
     language           = status.language
     if language != 'enx':
         print(f'    language: "{language}"')
+        if status.getVocolaTakesLanguages():
+            VocolaUserLanguageDirectory = os.path.join(VocolaUserDirectory, language)
+            print(f'    VocolaUserLanguageDirectory is now: "{VocolaUserDirectory}"')
+        
     ## perform init actions:
     natlinkvocolastartup.start()
 except ImportError:
@@ -92,6 +97,7 @@ else:
     
 # get location of MacroSystem folder:
 VocolaGrammarsDirectory = status.getVocolaGrammarsDirectory()
+print(f'VocolaUserLanguageDirectory: "{VocolaUserLanguageDirectory}"')
 
 VocolaFolder     = thisDir
 ExecFolder       = os.path.normpath(os.path.join(thisDir, 'exec'))
@@ -131,10 +137,8 @@ def vocolaGetModTime(file):
 checkExtensionsFolderContents(OriginalExtensionsFolder, ExtensionsFolder)
 
 if VocolaEnabled:
-    print('_vocola_main, Vocola is Enabled, check sys.path for ExecFolder and ExtensionsFolder')
     for _f in ExecFolder, ExtensionsFolder:
         if _f not in sys.path:
-            print(f'_vocola_main, add to sys.path: {_f}')
             sys.path.append(_f)
 else:
     print('_vocola_main, Vocola is NOT Enabled')
@@ -142,47 +146,45 @@ else:
 
 def get_command_folder():
     global commandFolder
-    commandFolder = get_top_command_folder()  ## (is global variable)
-    if commandFolder: 
-        uDir = os.path.join(commandFolder, language)
-        if os.path.isdir(uDir):
-            commandFolder = uDir
-    return commandFolder
-
-def get_top_command_folder():
-    return VocolaUserDirectory
-    # configured = None
-    # try:
-    #     from natlinkcore import natlinkstatus
-    #     # Quintijn's's installer:
-    #     configured = status.NatlinkStatus().getVocolaUserDirectory()
-    #     # print('Vocola configured: %s'% configured)
-    # except ImportError:
-    #     try:
-    #         import RegistryDict
-    #         import win32con
-    #         # Scott's installer:
-    #         r = RegistryDict.RegistryDict(win32con.HKEY_CURRENT_USER,r"Software\Natlink")
-    #         if r:
-    #             configured = r["VocolaUserDirectory"]
-    #     except ImportError:
-    #         pass
-    # if os.path.isdir(configured):
-    #     return configured
-    # 
-    # systemCommandFolder = os.path.join(VocolaFolder, 'Commands')
-    # if os.path.isdir(systemCommandFolder):
-    #     return systemCommandFolder
-    # 
-    # return None
-
-commandFolder = get_command_folder()
-if VocolaEnabled and not commandFolder:
-    print("Warning: no Vocola command folder found!", file=sys.stderr)
+    commandFolder = VocolaUserLanguageDirectory
+    # if commandFolder: 
+    #     uDir = os.path.join(commandFolder, language)
+    #     if os.path.isdir(uDir):
+    #         commandFolder = uDir
+    return VocolaUserLanguageDirectory
+# 
+# def get_top_command_folder():
+#     return VocolaUserDirectory
+#     # configured = None
+#     # try:
+#     #     from natlinkcore import natlinkstatus
+#     #     # Quintijn's's installer:
+#     #     configured = status.NatlinkStatus().getVocolaUserDirectory()
+#     #     # print('Vocola configured: %s'% configured)
+#     # except ImportError:
+#     #     try:
+#     #         import RegistryDict
+#     #         import win32con
+#     #         # Scott's installer:
+#     #         r = RegistryDict.RegistryDict(win32con.HKEY_CURRENT_USER,r"Software\Natlink")
+#     #         if r:
+#     #             configured = r["VocolaUserDirectory"]
+#     #     except ImportError:
+#     #         pass
+#     # if os.path.isdir(configured):
+#     #     return configured
+#     # 
+#     # systemCommandFolder = os.path.join(VocolaFolder, 'Commands')
+#     # if os.path.isdir(systemCommandFolder):
+#     #     return systemCommandFolder
+#     # 
+#     # return None
+# 
+# commandFolder = get_command_folder()
+# if VocolaEnabled and not commandFolder:
+#     print("Warning: no Vocola command folder found!", file=sys.stderr)
 
 VocolaUtils.Language = language
-
-
 
 ###########################################################################
 #                                                                         #
@@ -286,7 +288,7 @@ Commands" are activated.
         else: self.machine = 'local'
 
         self.load_extensions()
-        self.loadAllFiles(False)
+        self.loadAllFiles(force=True)
 
         self.load(self.gramSpec)
         self.activateAll()
@@ -360,7 +362,7 @@ Commands" are activated.
     # Load all command files
     def loadAllFiles(self, force):
         if commandFolder:
-            # print('loadAllFiles: %s'% commandFolder)
+            print(f'loadAllFiles: {commandFolder}, force: {force}')
             compile_Vocola(commandFolder, force)
 
     # Load command files for specific application
@@ -485,9 +487,9 @@ may_have_compiled = False  #
 
 # Run Vocola compiler, converting command files from "inputFileOrFolder"
 # and writing output to Natlink/MacroSystem
-def compile_Vocola(inputFileOrFolder, force):
+def compile_Vocola(inputFileOrFolder, force=None):
     global may_have_compiled, compiler_error
-
+    force = force or False
     may_have_compiled = True
 
     executable = sys.prefix + r'\python.exe'
