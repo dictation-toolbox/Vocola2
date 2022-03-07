@@ -645,8 +645,9 @@ def vocolaBeginCallback(moduleInfo):
             # set loader to 1 time trigger_load at beginCallback:
             # slow down of one utterance. Maybe set this to True at edit command file,
             # or make it a separate command, to set this property to True or False...
-            # print('_vocola_main, vocolaBeginCallback, set load_on_begin_utterance to 1')
-            # status.set_load_on_begin_utterance(1)
+            print('_vocola_main, vocolaBeginCallback, set load_on_begin_utterance to True')
+            status.set_load_on_begin_utterance(True)
+            print(f'_vocola_main, succes?? load_on_begin_utterance: {status.get_load_on_begin_utterance()}')
             pass 
 
 ###########################################################################
