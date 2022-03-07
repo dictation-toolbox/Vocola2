@@ -75,6 +75,7 @@ try:
     # print('VocolaEnabled: %s'% VocolaEnabled)
     VocolaUserLanguageDirectory = VocolaUserDirectory
     language           = status.language
+    language = 'nld'
     if language != 'enx':
         print(f'    language: "{language}"')
         if status.getVocolaTakesLanguages():
@@ -102,12 +103,12 @@ ExtensionsFolder = os.path.normpath(os.path.join(VocolaUserDirectory, 'extension
 
 def get_command_folder(command_folder):
     global commandFolder
-    commandFolder = VocolaUserLanguageDirectory
+    commandFolder = command_folder
     # if commandFolder: 
     #     uDir = os.path.join(commandFolder, language)
     #     if os.path.isdir(uDir):
     #         commandFolder = uDir
-    return VocolaUserLanguageDirectory
+    return command_folder
 
 commandFolder = ''    # set in get_command_folder(). 
 commandFolder = get_command_folder(VocolaUserLanguageDirectory)
@@ -555,7 +556,6 @@ def getLastVocolaFileModTime():
     return last
 
 def deleteOrphanFiles():
-    print("checking for orphans...")
     for f in os.listdir(VocolaGrammarsDirectory):
         if not re.search("_vcl.pyc?$", f): continue
 
