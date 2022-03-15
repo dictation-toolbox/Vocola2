@@ -140,12 +140,12 @@ def emit_context_activations(contexts):
     else:
         emit(2, "# Return if wrong application\n")
         executable = app
-        emit(2, "window = matchWindow(moduleInfo,'" + executable + "','')\n")
+        emit(2, "window = natlinkutils.matchWindow(moduleInfo,'" + executable + "','')\n")
         while executable.find("_") != -1:
             match = re.match(r'^(.+?)_+[^_]*$', executable)
             if not match: break
             executable = match.group(1)
-            emit(2, "if not window: window = matchWindow(moduleInfo,'" + \
+            emit(2, "if not window: window = natlinkutils.matchWindow(moduleInfo,'" + \
                     executable + "','')\n")
         emit(2, "if not window: return None\n")
 

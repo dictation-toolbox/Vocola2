@@ -264,24 +264,18 @@ def convert_file(in_file, out_folder, suffix):
         print(f'not a (Vocola, .vcl) file; "{in_path}"')
         return
 
-    print(f'processing (Vocola, .vcl) file; "{in_path}" to "{out_file}"')
-            
     in_time  = os.path.getmtime(in_path)
     out_time = 0
     if os.path.exists(out_file): out_time = os.path.getmtime(out_file)
     if not (in_time > out_time or Force_processing):
-        print(f'Vocola compile: skip {in_path},\n\tin_time: {in_time}, out_time: {out_time},\n\tForce_processing: {Force_processing}')
+        # print(f'Vocola compile: skip {in_path},\n\tin_time: {in_time}, out_time: {out_time},\n\tForce_processing: {Force_processing}')
         return
 
     if Debug>=1: print_log("\n==============================")
 
-    print(f'for parse_input, In_folder: {In_folder}')
-
     statements, Definitions, Function_definitions, statement_count, \
         error_count, should_emit_dictation_support, file_empty \
         = parse_input(Input_name, In_folder, Extension_functions, Debug)
-    print(f'statements: {statements}')
-    print(f'file_empty: {file_empty}')
     
     if error_count == 0:
         check_forward_references()
@@ -328,13 +322,12 @@ def convert_file(in_file, out_folder, suffix):
             OUT.close()
         except OSError as e:
             print_log("Couldn't open output file '" + out_file + "' for writing")
-        print_log("Converting " + Input_name)
-        print_log("  Warning: no commands in file.")
+        # print_log("Converting " + Input_name)
+        # print_log("  Warning: no commands in file.")
         return
 
     from vcl2py.emit import output
     #emit_output(out_file, statements)
-    print(f'output to {out_file}: {Definitions}')
     output(out_file, statements,
            VocolaVersion,
            should_emit_dictation_support,

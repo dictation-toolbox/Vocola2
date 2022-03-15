@@ -18,7 +18,7 @@ status = natlinkstatus.NatlinkStatus()
 def start():
     """starting two features of Vocola
     """
-    print('--- natlinkvocolastartup starting...')
+    # print('--- natlinkvocolastartup starting...')
     updateUnimacroHeaderIfNeeded()
     create_new_language_subdirectory_if_needed()
 ##

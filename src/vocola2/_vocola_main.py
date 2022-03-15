@@ -41,6 +41,7 @@ import stat             # from   stat import *    # file statistics
 import shutil
 import subprocess
 import re
+import logging
 import natlink
 from natlink import natlinkutils
 import VocolaUtils
@@ -58,8 +59,17 @@ thisDir = os.path.split(__file__)[0]
 
 try:
     from natlink import natlinkstatus
+    from natlink import loader  
+    from natlink import config    ## only needed when debugging probably
     Quintijn_installer = True
     status             = natlinkstatus.NatlinkStatus()
+
+    ## when natlinkmain is already there, the Logger and Config variables are ignored...
+    Logger = logging.getLogger('natlink')
+    Config = config.NatlinkConfig.from_first_found_file(loader.config_locations())
+    natlinkmain = loader.NatlinkMain(Logger, Config)
+    # natlinkmain.setup_logger()
+
     # print('status: %s'% status)
     VocolaEnabled      = bool(status.getVocolaUserDirectory())
     print(f'VocolaEnabled: {VocolaEnabled}')
@@ -75,14 +85,13 @@ try:
     # print('VocolaEnabled: %s'% VocolaEnabled)
     VocolaUserLanguageDirectory = VocolaUserDirectory
     language           = status.language
-    language = 'nld'
     if language != 'enx':
         print(f'    language: "{language}"')
         if status.getVocolaTakesLanguages():
             VocolaUserLanguageDirectory = os.path.join(VocolaUserDirectory, language)
             print(f'    VocolaUserLanguageDirectory: "{VocolaUserLanguageDirectory}"')
-    ## perform init actions:
-    natlinkvocolastartup.start()
+    ## perform init actions: exclude for testing purposes QH
+    # natlinkvocolastartup.start()
 except ImportError:
     Quintijn_installer = False
     VocolaEnabled      = True
@@ -256,11 +265,12 @@ Commands" are activated.
         else: self.machine = 'local'
 
         self.load_extensions()
-        self.loadAllFiles(force=True)
+        self.loadAllFiles(force=True)  # start loading all files
 
         self.load(self.gramSpec)
         self.activateAll()
 
+    
     def gotBegin(self, moduleInfo):
         self.currentModule = moduleInfo
         # delay enabling until now to avoid Natlink clobbering our callback:
@@ -271,7 +281,7 @@ Commands" are activated.
         # to be controlled via natlinkstatus.set_load_on_begin_utterance should be improved,
         # or simply set_load_on_begin_utterance to True, whenever a vocola command file is opened.
         # then check at each utterance!
-        vocolaBeginCallback(moduleInfo)
+        # vocolaBeginCallback(moduleInfo)   # pre load
 
 
     # Get app name by stripping folder and extension from currentModule name
@@ -283,7 +293,10 @@ Commands" are activated.
         """
         #TODO: this was to prevent ApplicationHost, and redirect to calc, photo etc.
         # appName = natlinkmain.getCurrentApplicationName(self.currentModule)
-        return self.currentModule
+        appPath = self.currentModule[0]
+        appFile = os.path.split(appPath)[-1]
+        appName = os.path.splitext(appFile)[0]
+        return appName
 
 
 ### Miscellaneous commands
@@ -372,34 +385,38 @@ Commands" are activated.
     # "Edit Commands" -- open command file for current application
     def gotResults_edit(self, words, fullResults):
         # set set_load_on_begin_utterance to True
-        status.set_load_on_begin_utterance = True
+        # natlinkmain.set_load_on_begin_utterance(True)
         app = self.getCurrentApplicationName()
         file = app + '.vcl'
         comment = 'Voice commands for ' + app
         self.openCommandFile(file, comment)
+        natlinkmain.set_on_begin_utterance_callback(vocolaBeginUtteranceCallback)
 
     # "Edit Machine Commands" -- open command file for current app & machine
     def gotResults_editMachine(self, words, fullResults):
         # set set_load_on_begin_utterance to True
-        status.set_load_on_begin_utterance = True
+        # natlinkmain.set_load_on_begin_utterance(True)
         app = self.getCurrentApplicationName()
         file = app + '@' + self.machine + '.vcl'
         comment = 'Voice commands for ' + app + ' on ' + self.machine
         self.openCommandFile(file, comment)
+        natlinkmain.set_on_begin_utterance_callback(vocolaBeginUtteranceCallback)
 
     # "Edit Global Commands" -- open global command file
     def gotResults_editGlobal(self, words, fullResults):
         # set set_load_on_begin_utterance to True
-        status.set_load_on_begin_utterance = True
+        # natlinkmain.set_load_on_begin_utterance(True)
         file = '_vocola.vcl'
         comment = 'Global voice commands'
         self.openCommandFile(file, comment)
+        natlinkmain.set_on_begin_utterance_callback(vocolaBeginUtteranceCallback)
 
     # "Edit Global Machine Commands" -- open global command file for machine
     def gotResults_editGlobalMachine(self, words, fullResults):
         file = '_vocola@' + self.machine + '.vcl'
         comment = 'Global voice commands on ' + self.machine
         self.openCommandFile(file, comment)
+        natlinkmain.set_on_begin_utterance_callback(vocolaBeginUtteranceCallback)
 
 
     def FindExistingCommandFile(self, file):
@@ -532,7 +549,12 @@ def compile_changed():
 
     current = getLastVocolaFileModTime()
     if current > lastVocolaFileTime:
+        # print('load all files, False....')
         compiler_error = False
+        if thisGrammar is None:
+            # this happens when this grammar is reloaded, and the callback from the loader is
+            # still pointing to a now unexisting thisGrammar object (actualle to None)
+            return 
         thisGrammar.loadAllFiles(False)
         if not compiler_error:
             lastVocolaFileTime = current
@@ -540,6 +562,7 @@ def compile_changed():
     source_changed = False
     if commandFolder:
         if vocolaGetModTime(commandFolder) > lastCommandFolderTime:
+            print(f'commandFolder changed, {lastCommandFolderTime}')
             lastCommandFolderTime = vocolaGetModTime(commandFolder)
             source_changed = True
     if source_changed:
@@ -637,18 +660,39 @@ def utterance_start_callback(moduleInfo):
 #     massaging Natlink to deal with new .py files
 #
 
-def vocolaBeginCallback(moduleInfo):
+def vocolaBeginUtteranceCallback():
+    """callback functions at begin utterance
+    
+    This one is initially off, but only activated when one of the "edit" commands
+    is called.
+    
+    Maybe the compile_changed should be limited here to the file(s) which are edited.
+    """
     changes = 0
     if Quintijn_installer:    ## ??? or getCallbackDepth()<2:
-        changes = utterance_start_callback(moduleInfo)
+        # moduleInfo = natlink.getCurrentModule()
+        # print(f'vocolaBeginUtteranceCallback, compile_changed for {moduleInfo}')
+        compile_changed()
+        changes = output_changes()
         if changes:
             # set loader to 1 time trigger_load at beginCallback:
-            # slow down of one utterance. Maybe set this to True at edit command file,
-            # or make it a separate command, to set this property to True or False...
-            print('_vocola_main, vocolaBeginCallback, set load_on_begin_utterance to True')
-            status.set_load_on_begin_utterance(True)
-            print(f'_vocola_main, succes?? load_on_begin_utterance: {status.get_load_on_begin_utterance()}')
-            pass 
+            # print(f'_vocola_main, vocolaBeginCallback, changes: {changes}')
+            natlinkmain.set_load_on_begin_utterance(1)
+
+
+def vocolaMicOnCallback():
+    """callback when the microphone is switched on.
+    
+    Here a complete check of changed vocola command files is done.
+    """
+    changes = 0
+    if Quintijn_installer:    ## ??? or getCallbackDepth()<2:
+        # moduleInfo = natlink.getCurrentModule()
+        # print(f'vocolaMicOnCallback, compile_changed for {moduleInfo}')
+        compile_changed()
+        changes = output_changes()
+        if changes:
+            print(f'_vocola_main, vocolaMicOnCallback, changes: {changes}')
 
 ###########################################################################
 #                                                                         #
@@ -669,11 +713,20 @@ else:
     print(f'Vocola version "{__init__.__version__}" starting...')
     thisGrammar = ThisGrammar()
     thisGrammar.initialize()
-
+    natlinkmain.set_on_mic_on_callback(vocolaMicOnCallback)
 
 def unload():
     global thisGrammar
     # disable_callback()
-    if thisGrammar: thisGrammar.unload()
+    if thisGrammar:
+        natlinkmain.delete_on_mic_on_callback(vocolaMicOnCallback)
+        # this one in case you edited vocola command files, via voice command:
+        natlinkmain.delete_on_begin_utterance_callback(vocolaMicOnCallback)
+        thisGrammar.unload()
     thisGrammar = None
-   
+    
+if __name__ == "__main__":
+    natlink.natConnect()
+    compile_changed()
+    natlink.natDisconnect()
+
