@@ -1,6 +1,6 @@
 """Vocola"""
 
-__version__ = '2.9.0'  # initial version with python3
+__version__ = '2.9.1'  # initial version with python3
 
 """utility functions, to get calling directory of module (in site-packages),
 
