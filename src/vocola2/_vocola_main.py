@@ -106,9 +106,9 @@ else:
     raise OSError("no valid directory found for _vocola_main.py: {thisDir}")
     
 VocolaFolder     = thisDir
-ExecFolder       = os.path.normpath(os.path.join(thisDir, 'exec'))
-OriginalExtensionsFolder = os.path.normpath(os.path.join(thisDir, 'extensions'))
-ExtensionsFolder = os.path.normpath(os.path.join(VocolaUserDirectory, 'extensions'))
+ExecFolder       = os.path.abspath(os.path.join(thisDir, 'exec'))
+OriginalExtensionsFolder = os.path.abspath(os.path.join(thisDir, 'extensions'))
+ExtensionsFolder = os.path.abspath(os.path.join(VocolaUserDirectory, 'extensions'))
 
 def get_command_folder(command_folder):
     global commandFolder
@@ -132,6 +132,8 @@ def checkExtensionsFolderContents(original, actual):
     
     """
     if not os.path.isdir(actual):
+        if os.path.exists(actual):
+            raise OSError(f'extensionsfolder exists, but is not a directory: "{actual}"')
         os.mkdir(actual)
     if not os.path.isdir(actual):
         raise OSError(f'Vocola2: the "actual" extensions folder {actual} could not be created')
