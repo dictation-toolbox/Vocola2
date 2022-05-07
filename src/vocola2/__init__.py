@@ -1,6 +1,7 @@
 """Vocola"""
 
-__version__ = '2.9.3'  # bugfix, typo
+__version__ = '2.9.4'  # bugfix, check for correct directories (VocolaUserDirectory, VocolaGrammarsDirectory)
+#             '2.9.3'  # bugfix, typo
 #             '2.9.2'  # bugfix, normpath changed into abspath
 #             '2.9.1'  # initial version with python3
 

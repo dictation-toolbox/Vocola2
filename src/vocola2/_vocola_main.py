@@ -77,10 +77,15 @@ try:
         VocolaGrammarsDirectory = status.getVocolaGrammarsDirectory()
         VocolaUserDirectory = status.getVocolaUserDirectory()
         VocolaDirectory = status.getVocolaDirectory()
+        if not os.path.isdir(VocolaUserDirectory):
+            raise OSError(f'VocolaUserDirectory does not exist, please create: "{VocolaUserDirectory}, or re-configure Natlink.')
+        if not os.path.isdir(VocolaGrammarsDirectory):
+            os.mkdir(VocolaGrammarsDirectory)
+            if not os.path.isdir(VocolaGrammarsDirectory):
+                raise OSError(f'Could not create the "VocolaGrammarsDirecory": "{VocolaGrammarsDirectory}"')
+            
     else:
-        VocolaGrammarsDirectory = ""
-        VocolaUserDirectory = ""
-        VocolaDirectory = ""
+        raise OSError(f'Vocola is not Enabled, but this directory "{thisDir}" seems to be in the "directories" section of Natlink, please check your configuration.')
         
     # print('VocolaEnabled: %s'% VocolaEnabled)
     VocolaUserLanguageDirectory = VocolaUserDirectory
