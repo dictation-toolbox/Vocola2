@@ -80,6 +80,9 @@ try:
         if not os.path.isdir(VocolaUserDirectory):
             raise OSError(f'VocolaUserDirectory does not exist, please create: "{VocolaUserDirectory}, or re-configure Natlink.')
         if not os.path.isdir(VocolaGrammarsDirectory):
+            oneup = os.path.abspath(os.path.join(VocolaUserDirectory, '..'))
+            if not os.path.isdir(oneup):
+                raise OSError(f'_vocola_main: cannot create VocolaGrammarsDirectory "{VocolaGrammarsDirectory}", because the\n\tdirectory above, "{oneup}", is not a directory')
             os.mkdir(VocolaGrammarsDirectory)
             if not os.path.isdir(VocolaGrammarsDirectory):
                 raise OSError(f'Could not create the "VocolaGrammarsDirecory": "{VocolaGrammarsDirectory}"')
@@ -94,7 +97,9 @@ try:
         print(f'    language: "{language}"')
         if status.getVocolaTakesLanguages():
             VocolaUserLanguageDirectory = os.path.join(VocolaUserDirectory, language)
-            print(f'    VocolaUserLanguageDirectory: "{VocolaUserLanguageDirectory}"')
+            if not os.path.exists(VocolaUserLanguageDirectory):
+                os.mkdir(VocolaUserLanguageDirectory)
+                
     ## perform init actions: exclude for testing purposes QH
     # natlinkvocolastartup.start()
 except ImportError:
@@ -495,6 +500,7 @@ def compile_Vocola(inputFileOrFolder, force=None):
 
     arguments += ["-suffix", "_vcl"]
     if force: arguments += ["-f"]
+    print(f'compile_Vocola, inputFileOrFolder: "{inputFileOrFolder}"')
     arguments += [inputFileOrFolder, VocolaGrammarsDirectory]
     # print(f'_vocola_main calls vcl2py.py, grammars go to folder: {VocolaGrammarsDirectory}')
     # print(f'calling executable: {executable}')
