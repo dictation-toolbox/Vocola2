@@ -4,7 +4,7 @@
 # Quintijn Hoogenboom, 2020-08-22
 #
 # catches the clipboard, and pastes back if there is relevant input, and there were changes
-import natlinkclipboard
+from dtactions import natlinkclipboard
 import re
 
 rePrintLineDoubleQuote = re.compile(r'(\s*)print\((\")([^\"]+)\"%(.*$)')

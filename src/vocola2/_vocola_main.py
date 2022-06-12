@@ -30,18 +30,24 @@ ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-
+#pylint:disable=W0614, W0613, C0116, C0321, W0603, R0201, W0401, C0115, C0412, W0201
+#pylint:disable=E1101
 import sys
 import traceback
 import os               # access to file information
 import os.path          # to parse filenames
-import time             # print time in messages
-from   stat import *    # file statistics
+# import time             # print time in messages
+import stat             # from   stat import *    # file statistics
 import shutil
+import subprocess
 import re
+import logging
 import natlink
-import natlinkmain
-from   natlinkutils import *
+from natlink import natlinkutils
+import VocolaUtils
+import natlinkvocolastartup  # was natlinkstartup in natlinkmain...
+from vocola2.exec.vcl2py.main import main_routine     # main.main_routine  compile function
+import __init__
 
 thisDir = os.path.split(__file__)[0]
 
@@ -52,26 +58,50 @@ thisDir = os.path.split(__file__)[0]
 ##########################################################################
 
 try:
-    import natlinkstatus
+    from natlink import natlinkstatus
+    from natlink import loader  
+    from natlink import config    ## only needed when debugging probably
     Quintijn_installer = True
     status             = natlinkstatus.NatlinkStatus()
+
+    ## when natlinkmain is already there, the Logger and Config variables are ignored...
+    Logger = logging.getLogger('natlink')
+    Config = config.NatlinkConfig.from_first_found_file(loader.config_locations())
+    natlinkmain = loader.NatlinkMain(Logger, Config)
+    # natlinkmain.setup_logger()
+
     # print('status: %s'% status)
-    VocolaEnabled      = not not status.getVocolaUserDirectory()
+    VocolaEnabled      = bool(status.getVocolaUserDirectory())
     print(f'VocolaEnabled: {VocolaEnabled}')
     if VocolaEnabled:
-        VocolaGrammarsDirecory = status.getVocolaGrammarsDirectory()
+        VocolaGrammarsDirectory = status.getVocolaGrammarsDirectory()
         VocolaUserDirectory = status.getVocolaUserDirectory()
         VocolaDirectory = status.getVocolaDirectory()
+        if not os.path.isdir(VocolaUserDirectory):
+            raise OSError(f'VocolaUserDirectory does not exist, please create: "{VocolaUserDirectory}, or re-configure Natlink.')
+        if not os.path.isdir(VocolaGrammarsDirectory):
+            oneup = os.path.abspath(os.path.join(VocolaUserDirectory, '..'))
+            if not os.path.isdir(oneup):
+                raise OSError(f'_vocola_main: cannot create VocolaGrammarsDirectory "{VocolaGrammarsDirectory}", because the\n\tdirectory above, "{oneup}", is not a directory')
+            os.mkdir(VocolaGrammarsDirectory)
+            if not os.path.isdir(VocolaGrammarsDirectory):
+                raise OSError(f'Could not create the "VocolaGrammarsDirecory": "{VocolaGrammarsDirectory}"')
+            
     else:
-        VocolaGrammarsDirecory = ""
-        VocolaUserDirectory = ""
-        VocolaDirectory = ""
+        raise OSError(f'Vocola is not Enabled, but this directory "{thisDir}" seems to be in the "directories" section of Natlink, please check your configuration.')
         
     # print('VocolaEnabled: %s'% VocolaEnabled)
-    language           = status.getLanguage()
+    VocolaUserLanguageDirectory = VocolaUserDirectory
+    language           = status.language
     if language != 'enx':
-        print('    language: %s'% language)
-    
+        print(f'    language: "{language}"')
+        if status.getVocolaTakesLanguages():
+            VocolaUserLanguageDirectory = os.path.join(VocolaUserDirectory, language)
+            if not os.path.exists(VocolaUserLanguageDirectory):
+                os.mkdir(VocolaUserLanguageDirectory)
+                
+    ## perform init actions: exclude for testing purposes QH
+    # natlinkvocolastartup.start()
 except ImportError:
     Quintijn_installer = False
     VocolaEnabled      = True
@@ -79,22 +109,28 @@ except ImportError:
     traceback.print_exc()
 
 if thisDir and os.path.isdir(thisDir):
-    pass
     if VocolaEnabled:
-        if VocolaDirectory != thisDir:
+        if VocolaDirectory.lower() != thisDir.lower():
             print(f"thisDir of _vocola_main: {thisDir} not equal to VocolaDirectory from natlinkstatus: {VocolaDirectory}")
 else:
-    raise IOError("no valid directory found for _vocola_main.py: {thisDir}")
+    raise OSError("no valid directory found for _vocola_main.py: {thisDir}")
     
-
-# get location of MacroSystem folder:
-CoreDirectory = status.getCoreDirectory()
-NatlinkFolder = os.path.normpath(os.path.join(CoreDirectory, ".."))
-
 VocolaFolder     = thisDir
-ExecFolder       = os.path.normpath(os.path.join(thisDir, 'exec'))
-OriginalExtensionsFolder = os.path.normpath(os.path.join(thisDir, 'extensions'))
-ExtensionsFolder = os.path.normpath(os.path.join(VocolaUserDirectory, 'extensions'))
+ExecFolder       = os.path.abspath(os.path.join(thisDir, 'exec'))
+OriginalExtensionsFolder = os.path.abspath(os.path.join(thisDir, 'extensions'))
+ExtensionsFolder = os.path.abspath(os.path.join(VocolaUserDirectory, 'extensions'))
+
+def get_command_folder(command_folder):
+    global commandFolder
+    commandFolder = command_folder
+    # if commandFolder: 
+    #     uDir = os.path.join(commandFolder, language)
+    #     if os.path.isdir(uDir):
+    #         commandFolder = uDir
+    return command_folder
+
+commandFolder = ''    # set in get_command_folder(). 
+commandFolder = get_command_folder(VocolaUserLanguageDirectory)
 
 def checkExtensionsFolderContents(original, actual):
     """create the actual extensions folder and check the contents
@@ -106,9 +142,11 @@ def checkExtensionsFolderContents(original, actual):
     
     """
     if not os.path.isdir(actual):
+        if os.path.exists(actual):
+            raise OSError(f'extensionsfolder exists, but is not a directory: "{actual}"')
         os.mkdir(actual)
     if not os.path.isdir(actual):
-        raise IOError(f'Vocola2: the "actual" extensions folder {actual} could not be created')
+        raise OSError(f'Vocola2: the "actual" extensions folder {actual} could not be created')
     filesToCopyIfNewer = [f for f in os.listdir(original) if f.endswith('.py')]
     filesToCopyIfNewer.append('README.txt')
     
@@ -119,71 +157,23 @@ def checkExtensionsFolderContents(original, actual):
         targetDate = vocolaGetModTime(targetPy)
         if orgDate > targetDate:
             shutil.copyfile(orgPy, targetPy)
-                       
+
 # Returns the modification time of a file or 0 if the file does not exist:
 def vocolaGetModTime(file):
-    try: return os.stat(file)[ST_MTIME]
+    try: return os.stat(file)[stat.ST_MTIME]
     except OSError: return 0        # file not found
 
-
+                       
 checkExtensionsFolderContents(OriginalExtensionsFolder, ExtensionsFolder)
 
-# NatlinkFolder = os.path.abspath(NatlinkFolder)
-
 if VocolaEnabled:
-    print('_vocola_main, Vocola is Enabled, check sys.path for ExecFolder and ExtensionsFolder')
-    for f in ExecFolder, ExtensionsFolder:
-        if f not in sys.path:
-            print(f'_vocola_main, add to sys.path: {f}')
-            sys.path.append(f)
+    for _f in ExecFolder, ExtensionsFolder:
+        if _f not in sys.path:
+            sys.path.append(_f)
 else:
     print('_vocola_main, Vocola is NOT Enabled')
-    
 
-def get_command_folder():
-    commandFolder = get_top_command_folder()
-    if commandFolder:
-        uDir = os.path.join(commandFolder, language)
-        if os.path.isdir(uDir):
-            commandFolder = uDir
-    return commandFolder
-
-def get_top_command_folder():
-    return VocolaUserDirectory
-    # configured = None
-    # try:
-    #     import natlinkstatus
-    #     # Quintijn's's installer:
-    #     configured = status.NatlinkStatus().getVocolaUserDirectory()
-    #     # print('Vocola configured: %s'% configured)
-    # except ImportError:
-    #     try:
-    #         import RegistryDict
-    #         import win32con
-    #         # Scott's installer:
-    #         r = RegistryDict.RegistryDict(win32con.HKEY_CURRENT_USER,r"Software\Natlink")
-    #         if r:
-    #             configured = r["VocolaUserDirectory"]
-    #     except ImportError:
-    #         pass
-    # if os.path.isdir(configured):
-    #     return configured
-    # 
-    # systemCommandFolder = os.path.join(VocolaFolder, 'Commands')
-    # if os.path.isdir(systemCommandFolder):
-    #     return systemCommandFolder
-    # 
-    # return None
-
-commandFolder = get_command_folder()
-if VocolaEnabled and not commandFolder:
-    print("Warning: no Vocola command folder found!", file=sys.stderr)
-
-
-import VocolaUtils
 VocolaUtils.Language = language
-
-
 
 ###########################################################################
 #                                                                         #
@@ -191,7 +181,7 @@ VocolaUtils.Language = language
 #                                                                         #
 ###########################################################################
 
-class ThisGrammar(GrammarBase):
+class ThisGrammar(natlinkutils.GrammarBase):
 
     gramSpec = """
         <NatLinkWindow>     exported = [Show] (Natlink|Vocola) Window;
@@ -281,22 +271,29 @@ now the English versions, like "Edit Commands" and "Edit Global
 Commands" are activated.
 """ % language, file=sys.stderr)
 
-
     def initialize(self):
         if 'COMPUTERNAME' in os.environ:
             self.machine = os.environ['COMPUTERNAME'].lower()
         else: self.machine = 'local'
 
         self.load_extensions()
-        self.loadAllFiles(False)
+        self.loadAllFiles(force=True)  # start loading all files
 
         self.load(self.gramSpec)
         self.activateAll()
 
+    
     def gotBegin(self, moduleInfo):
         self.currentModule = moduleInfo
         # delay enabling until now to avoid Natlink clobbering our callback:
-        enable_callback()
+        # enable_callback()
+        # here try to catch changed .vcl files and rewrite the corresponding python grammar file
+        # now, there is a slowdown of one utterance, at it seems.
+        # the tuning of lood_on_got_begin property in the loader class,
+        # to be controlled via natlinkstatus.set_load_on_begin_utterance should be improved,
+        # or simply set_load_on_begin_utterance to True, whenever a vocola command file is opened.
+        # then check at each utterance!
+        # vocolaBeginCallback(moduleInfo)   # pre load
 
 
     # Get app name by stripping folder and extension from currentModule name
@@ -306,7 +303,11 @@ Commands" are activated.
         The same named function in natlinkmain returns the lowercase executable of the running
         program, but if "ApplicationFrameHost" is running (Calc, Photos), that name is returned.
         """
-        appName = natlinkmain.getCurrentApplicationName(self.currentModule)
+        #TODO: this was to prevent ApplicationHost, and redirect to calc, photo etc.
+        # appName = natlinkmain.getCurrentApplicationName(self.currentModule)
+        appPath = self.currentModule[0]
+        appFile = os.path.split(appPath)[-1]
+        appName = os.path.splitext(appFile)[0]
         return appName
 
 
@@ -324,8 +325,7 @@ Commands" are activated.
                 del sys.modules[module]
 
     def load_extensions(self, verbose=False):
-        #if sys.modules.has_key("scan_extensions"):
-        #    del sys.modules["scan_extensions"]
+        #pylint:disable=C0415, E0401  # check!!!
         import scan_extensions
         arguments = ["scan_extensions", ExtensionsFolder]
         if verbose:
@@ -355,7 +355,7 @@ Commands" are activated.
     # Load all command files
     def loadAllFiles(self, force):
         if commandFolder:
-            # print('loadAllFiles: %s'% commandFolder)
+            print(f'loadAllFiles: {commandFolder}, force: {force}')
             compile_Vocola(commandFolder, force)
 
     # Load command files for specific application
@@ -363,7 +363,7 @@ Commands" are activated.
         special = re.compile(r'([][()^$.+*?{\\])')
         pattern = "^" + special.sub(r'\\\1', module)
         pattern += "(_[^@]*)?(@" + special.sub(r'\\\1', self.machine)
-        pattern += ")?\.vcl$"
+        pattern += r")?\.vcl$"
         p = re.compile(pattern, re.IGNORECASE)
 
         targets = []
@@ -396,29 +396,39 @@ Commands" are activated.
 
     # "Edit Commands" -- open command file for current application
     def gotResults_edit(self, words, fullResults):
+        # set set_load_on_begin_utterance to True
+        # natlinkmain.set_load_on_begin_utterance(True)
         app = self.getCurrentApplicationName()
         file = app + '.vcl'
         comment = 'Voice commands for ' + app
         self.openCommandFile(file, comment)
+        natlinkmain.set_on_begin_utterance_callback(vocolaBeginUtteranceCallback)
 
     # "Edit Machine Commands" -- open command file for current app & machine
     def gotResults_editMachine(self, words, fullResults):
+        # set set_load_on_begin_utterance to True
+        # natlinkmain.set_load_on_begin_utterance(True)
         app = self.getCurrentApplicationName()
         file = app + '@' + self.machine + '.vcl'
         comment = 'Voice commands for ' + app + ' on ' + self.machine
         self.openCommandFile(file, comment)
+        natlinkmain.set_on_begin_utterance_callback(vocolaBeginUtteranceCallback)
 
     # "Edit Global Commands" -- open global command file
     def gotResults_editGlobal(self, words, fullResults):
+        # set set_load_on_begin_utterance to True
+        # natlinkmain.set_load_on_begin_utterance(True)
         file = '_vocola.vcl'
         comment = 'Global voice commands'
         self.openCommandFile(file, comment)
+        natlinkmain.set_on_begin_utterance_callback(vocolaBeginUtteranceCallback)
 
     # "Edit Global Machine Commands" -- open global command file for machine
     def gotResults_editGlobalMachine(self, words, fullResults):
         file = '_vocola@' + self.machine + '.vcl'
         comment = 'Global voice commands on ' + self.machine
         self.openCommandFile(file, comment)
+        natlinkmain.set_on_begin_utterance_callback(vocolaBeginUtteranceCallback)
 
 
     def FindExistingCommandFile(self, file):
@@ -469,18 +479,20 @@ Commands" are activated.
 ###########################################################################
 
 may_have_compiled = False  # has the compiler been called?
-compile_error     = False  # has a compiler error occurred?
+compiler_error     = False  # has a compiler error occurred?
+may_have_compiled = False  #
 
 # Run Vocola compiler, converting command files from "inputFileOrFolder"
 # and writing output to Natlink/MacroSystem
-def compile_Vocola(inputFileOrFolder, force):
+def compile_Vocola(inputFileOrFolder, force=None):
     global may_have_compiled, compiler_error
-
+    force = force or False
     may_have_compiled = True
 
-    executable = sys.prefix + r'\python.exe'
-    arguments  = [VocolaFolder + r'\exec\vcl2py.py']
+    # executable = sys.prefix + r'\python.exe'
+    # arguments  = [VocolaFolder + r'\exec\vcl2py.py']
 
+    arguments = []
     arguments += ['-extensions', ExtensionsFolder + r'\extensions.csv']
     if language == "enx":
         arguments += ['-numbers',
@@ -488,28 +500,38 @@ def compile_Vocola(inputFileOrFolder, force):
 
     arguments += ["-suffix", "_vcl"]
     if force: arguments += ["-f"]
-    # arguments += [inputFileOrFolder, NatlinkFolder]
-    arguments += [inputFileOrFolder, VocolaGrammarsDirecory]
-    # print(f"_vocola_main calls vcl2py.py, grammars go to folder: {VocolaGrammarsDirecory}")
-    # print(f"calling {arguments}")
-    hidden_call(executable, arguments)
-
-    logName = commandFolder + r'\vcl2py_log.txt'
-    if os.path.isfile(logName):
-        try:
-            log = open(logName, 'r')
-            compiler_error = True
-            print(log.read(), file=sys.stderr)
-            log.close()
-            os.remove(logName)
-        except IOError:  # no log file means no Vocola errors
-            pass
+    print(f'compile_Vocola, inputFileOrFolder: "{inputFileOrFolder}"')
+    arguments += [inputFileOrFolder, VocolaGrammarsDirectory]
+    # print(f'_vocola_main calls vcl2py.py, grammars go to folder: {VocolaGrammarsDirectory}')
+    # print(f'calling executable: {executable}')
+    # print(f'calling main with arguments: {arguments}')
+    #======================
+    main_routine(arguments)
+    #======================
+    # hidden_call(executable, arguments)
+    # 
+    # logName = commandFolder + r'\vcl2py_log.txt'
+    # if os.path.isfile(logName):
+    #     try:
+    #         log = open(logName, 'r')
+    #         compiler_error = True
+    #         print(log.read(), file=sys.stderr)
+    #         log.close()
+    #         os.remove(logName)
+    #     except OSError:  # no log file means no Vocola errors
+    #         pass
 
 # Unload all commands, including those of files no longer existing
 def purgeOutput():
-    pattern = re.compile("_vcl\d*\.pyc?$")
-    [os.remove(os.path.join(NatlinkFolder,f)) for f
-     in os.listdir(NatlinkFolder) if pattern.search(f)]
+    # print(f'purge output, directory: {VocolaGrammarsDirecory} {len(os.listdir(VocolaGrammarsDirecory))} files')
+    # pattern = re.compile(r"_vcl\d*\.pyc?$")
+    nFiles = 0
+    for f in os.listdir(VocolaGrammarsDirectory):
+        if f.endswith('.py'):
+            nFiles += 1
+            os.remove(os.path.join(VocolaGrammarsDirectory, f))
+    # print('purged output, directory: {VocolaGrammarsDirecory}, {nFiles} python files')collapse
+    # print('-------------------')
 
 #
 # Run program with path executable and arguments arguments.  Waits for
@@ -518,7 +540,6 @@ def purgeOutput():
 def hidden_call(executable, arguments):
     args = [executable] + arguments
     try:
-        import subprocess
         si             = subprocess.STARTUPINFO()
         # Location of below constants seems to vary from Python
         # version to version so hardcode them:
@@ -541,18 +562,24 @@ def compile_changed():
 
     current = getLastVocolaFileModTime()
     if current > lastVocolaFileTime:
+        # print('load all files, False....')
         compiler_error = False
+        if thisGrammar is None:
+            # this happens when this grammar is reloaded, and the callback from the loader is
+            # still pointing to a now unexisting thisGrammar object (actualle to None)
+            return 
         thisGrammar.loadAllFiles(False)
         if not compiler_error:
             lastVocolaFileTime = current
 
-    #source_changed = False
-    #if commandFolder:
-    #    if vocolaGetModTime(commandFolder) > lastCommandFolderTime:
-    #        lastCommandFolderTime = vocolaGetModTime(commandFolder)
-    #        source_changed = True
-    #if source_changed:
-    #    deleteOrphanFiles()
+    source_changed = False
+    if commandFolder:
+        if vocolaGetModTime(commandFolder) > lastCommandFolderTime:
+            print(f'commandFolder changed, {lastCommandFolderTime}')
+            lastCommandFolderTime = vocolaGetModTime(commandFolder)
+            source_changed = True
+    if source_changed:
+        deleteOrphanFiles()
 
 # Returns the newest modified time of any Vocola command folder file or
 # 0 if none:
@@ -564,22 +591,15 @@ def getLastVocolaFileModTime():
                     for f in os.listdir(commandFolder)])
     return last
 
-# Returns the modification time of a file or 0 if the file does not exist:
-def vocolaGetModTime(file):
-    try: return os.stat(file)[ST_MTIME]
-    except OSError: return 0        # file not found
-
-
 def deleteOrphanFiles():
-    print("checking for orphans...")
-    for f in os.listdir(NatlinkFolder):
+    for f in os.listdir(VocolaGrammarsDirectory):
         if not re.search("_vcl.pyc?$", f): continue
 
         s = getSourceFilename(f)
         if s:
             if vocolaGetModTime(s)>0: continue
 
-        f = os.path.join(NatlinkFolder, f)
+        f = os.path.join(VocolaGrammarsDirectory, f)
         print("Deleting: " + f)
         os.remove(f)
 
@@ -610,20 +630,20 @@ lastNatLinkModTime = 0
 #   1: 1 or more existing .py files were modified, but no new .py files created
 #   2: one or more new .py files may have been created, plus maybe existing changed
 def output_changes():
+    #pylint:disable=W0603
     global lastNatLinkModTime, may_have_compiled
 
     old_may_have_compiled = may_have_compiled
     may_have_compiled = False
 
-    current = vocolaGetModTime(NatlinkFolder)
+    current = vocolaGetModTime(VocolaGrammarsDirectory)
     if current > lastNatLinkModTime:
         lastNatLinkModTime = current
         return 2
 
     if old_may_have_compiled:
         return 1
-    else:
-        return 0
+    return 0
 
 
 # When speech is heard this function will be called before any others.
@@ -653,42 +673,39 @@ def utterance_start_callback(moduleInfo):
 #     massaging Natlink to deal with new .py files
 #
 
-
-callback_enabled = False
-
-def enable_callback():
-    global callback_enabled
-    if not callback_enabled:
-        callback_enabled = True
-        if not Quintijn_installer:
-            # Replace Natlink's "begin" callback function with ours:
-            natlink.setBeginCallback(vocolaBeginCallback)
-
-def disable_callback():
-    global callback_enabled
-    callback_enabled = False
-    if not Quintijn_installer:
-        natlink.setBeginCallback(beginCallback)
-
-
-def vocolaBeginCallback(moduleInfo):
-    if not callback_enabled:
-        return 0
-
+def vocolaBeginUtteranceCallback():
+    """callback functions at begin utterance
+    
+    This one is initially off, but only activated when one of the "edit" commands
+    is called.
+    
+    Maybe the compile_changed should be limited here to the file(s) which are edited.
+    """
     changes = 0
-    if Quintijn_installer or getCallbackDepth()<2:
-        changes = utterance_start_callback(moduleInfo)
-
-    if Quintijn_installer:
-        return changes
-    else:
-        if changes > 1:
-            # make sure Natlink sees any new .py files:
-            natlinkmain.findAndLoadFiles()
-            natlinkmain.loadModSpecific(moduleInfo)
-        natlinkmain.beginCallback(moduleInfo)
+    if Quintijn_installer:    ## ??? or getCallbackDepth()<2:
+        # moduleInfo = natlink.getCurrentModule()
+        # print(f'vocolaBeginUtteranceCallback, compile_changed for {moduleInfo}')
+        compile_changed()
+        changes = output_changes()
+        if changes:
+            # set loader to 1 time trigger_load at beginCallback:
+            # print(f'_vocola_main, vocolaBeginCallback, changes: {changes}')
+            natlinkmain.set_load_on_begin_utterance(1)
 
 
+def vocolaMicOnCallback():
+    """callback when the microphone is switched on.
+    
+    Here a complete check of changed vocola command files is done.
+    """
+    changes = 0
+    if Quintijn_installer:    ## ??? or getCallbackDepth()<2:
+        # moduleInfo = natlink.getCurrentModule()
+        # print(f'vocolaMicOnCallback, compile_changed for {moduleInfo}')
+        compile_changed()
+        changes = output_changes()
+        if changes:
+            print(f'_vocola_main, vocolaMicOnCallback, changes: {changes}')
 
 ###########################################################################
 #                                                                         #
@@ -706,18 +723,23 @@ purgeOutput()
 if not VocolaEnabled:
     print("Vocola not active")
 else:
-    print("Vocola version 2.8.6 starting...")
+    print(f'Vocola version "{__init__.__version__}" starting...')
     thisGrammar = ThisGrammar()
     thisGrammar.initialize()
-
+    natlinkmain.set_on_mic_on_callback(vocolaMicOnCallback)
 
 def unload():
     global thisGrammar
-    disable_callback()
-    if thisGrammar: thisGrammar.unload()
+    # disable_callback()
+    if thisGrammar:
+        natlinkmain.delete_on_mic_on_callback(vocolaMicOnCallback)
+        # this one in case you edited vocola command files, via voice command:
+        natlinkmain.delete_on_begin_utterance_callback(vocolaMicOnCallback)
+        thisGrammar.unload()
     thisGrammar = None
-
-
+    
 if __name__ == "__main__":
-    loadAllFiles(r"C:\Users\Gebruiker\Documents\vocola_qh", force=1)
-    print('all files loaded')
+    natlink.natConnect()
+    compile_changed()
+    natlink.natDisconnect()
+

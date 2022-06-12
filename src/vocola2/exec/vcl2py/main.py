@@ -6,49 +6,57 @@ import os
 import re
 import sys
 
-from vcl2py.emit      import output
-from vcl2py.lex       import initialize_token_properties
-from vcl2py.log       import *
-from vcl2py.parse     import parse_input, check_forward_references
-from vcl2py.transform import transform
+# from vcl2py.emit      import output
+# from vcl2py.lex       import initialize_token_properties
+# from vcl2py.log       import *
+# from vcl2py.parse     import parse_input, check_forward_references
+# from vcl2py.transform import transform
+# from vocola2.__init__ import __version__ as VocolaVersion
 
-
-VocolaVersion = "2.8.6"
-
+# without the hidden_call:
+from vocola2.exec.vcl2py.emit      import output
+from vocola2.exec.vcl2py.lex       import initialize_token_properties
+from vocola2.exec.vcl2py.log       import *
+from vocola2.exec.vcl2py.parse     import parse_input, check_forward_references
+from vocola2.exec.vcl2py.transform import transform
+from vocola2.__init__ import __version__ as VocolaVersion
 
 # ---------------------------------------------------------------------------
 # Messages to standard error
 
 def fatal_error(message):
-    print("vcl2py.py: Error: " + message, file=sys.stderr)
-    sys.exit(99)
-
+    print("====vcl2py.py: Error: " + message)
+    # sys.exit(99)
+def print_log(message):
+    ## for the interactive version (QH)
+    print('----'+message)
 
 def usage(message=""):
     global VocolaVersion
 
     if message != "":
-        print("vcl2py.py: Error: " + message, file=sys.stderr)
+        print("vcl2py.py: Error: " + message)
 
-    print('''
-Usage: python vcl2py.pl [<option>...] <inputFileOrFolder> <outputFolder>
-  where <option> ::= -debug <n> | -extensions <filename> | -f
-                  |-INI_file <filename> | -log_file <filename> | -log_stdout
-                  | -max_commands <n> | -q | -suffix <s>
-
-''', file=sys.stderr)
-    print("Vocola 2 version: " + VocolaVersion, file=sys.stderr)
-    sys.exit(99)
+#     print('''
+# Usage: python vcl2py.pl [<option>...] <inputFileOrFolder> <outputFolder>
+#   where <option> ::= -debug <n> | -extensions <filename> | -f
+#                   |-INI_file <filename> | -log_file <filename> | -log_stdout
+#                   | -max_commands <n> | -q | -suffix <s>
+# ''')
+    print('invalid option in call of main_routine of vcl2py')
+    print("Vocola2 version: " + VocolaVersion)
+    # sys.exit(99)
 
 
 
 # ---------------------------------------------------------------------------
 # Main control flow
-
-def main_routine():
+# call directly from _vocola_main (instead of hidden call)hoe
+def main_routine(args):
     global Debug, Default_maximum_commands, Error_encountered, Force_processing, In_folder, Default_number_words
     global Extension_functions
 
+    # print(f'main_routine, {args}')
     # flush output after every print statement:
     #sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)    # <<<>>>
 
@@ -67,7 +75,7 @@ def main_routine():
     log_to_stdout            = False
     suffix                   = "_vcl"
 
-    argv = sys.argv[1:]
+    argv = args   ##### or sys.argv[1:]
     while len(argv) > 0:
         option = argv[0]
         if not option[0:1] == "-": break
@@ -123,14 +131,14 @@ def main_routine():
     if log_file == "": log_file = In_folder + os.sep + "vcl2py_log.txt"
     if ini_file == "": ini_file = In_folder + os.sep + "Vocola.INI"
 
-    if log_to_stdout:
-        set_log(sys.stdout)
-    else:
-        try:
-            set_log(open(log_file, "w"))
-        except IOError as e:
-            fatal_error("Unable to open log file '" + log_file +
-                        "' for writing: " + str(e))
+    # if log_to_stdout:
+    #     set_log(sys.stdout)
+    # else:
+    #     try:
+    #         set_log(open(log_file, "w"))
+    #     except OSError as e:
+    #         fatal_error("Unable to open log file '" + log_file +
+    #                     "' for writing: " + str(e))
 
 
     if not ignore_INI_file:   read_ini_file(ini_file)
@@ -145,12 +153,12 @@ def main_routine():
     initialize_token_properties()
     convert_files(in_file, out_folder, suffix)
 
-    close_log()
-    if not Error_encountered:
-        if not log_to_stdout: os.remove(log_file)
-        sys.exit(0)
-    else:
-        sys.exit(1)
+    # # close_log()
+    # if not Error_encountered:
+    #     if not log_to_stdout: os.remove(log_file)
+    #     sys.exit(0)
+    # else:
+    #     sys.exit(1)
 
 def safe_int(text, default=0):
     try:
@@ -171,7 +179,7 @@ def read_ini_file(ini_file):
             value   = match.group(2)
             if keyword == "MaximumCommands":
                 Default_maximum_commands = safe_int(value, 1)
-    except IOError as e:
+    except OSError as e:
         return
 
 def read_extensions_file(extensions_filename):
@@ -193,7 +201,7 @@ def read_extensions_file(extensions_filename):
             function_name     = match.group(6)
 
             extension_functions[extension_name] = [minimum_arguments, maximum_arguments, needs_flushing, module_name, function_name]
-    except IOError as e:
+    except OSError as e:
         pass
     return extension_functions
 
@@ -216,7 +224,7 @@ def expand_in_file(in_file, in_folder):
                 if not (match and match.group(1).lower() != machine):
                     result += [in_file]
         return result
-    except IOError as e:
+    except OSError as e:
         fatal_error("Couldn't open/list folder '" + in_folder + "': " + str(e))
 
 
@@ -252,19 +260,23 @@ def convert_file(in_file, out_folder, suffix):
     out_file = out_folder + os.sep + out_file + suffix + ".py"
 
     in_path = In_folder + os.sep + Input_name
-    if os.path.exists(in_path):
-        in_time  = os.path.getmtime(in_path)
-        out_time = 0
-        if os.path.exists(out_file): out_time = os.path.getmtime(out_file)
-        if in_time<out_time and not Force_processing:
-            return
+    if not os.path.isfile(in_path):
+        print(f'not a (Vocola, .vcl) file; "{in_path}"')
+        return
 
+    in_time  = os.path.getmtime(in_path)
+    out_time = 0
+    if os.path.exists(out_file): out_time = os.path.getmtime(out_file)
+    if not (in_time > out_time or Force_processing):
+        # print(f'Vocola compile: skip {in_path},\n\tin_time: {in_time}, out_time: {out_time},\n\tForce_processing: {Force_processing}')
+        return
 
     if Debug>=1: print_log("\n==============================")
 
     statements, Definitions, Function_definitions, statement_count, \
         error_count, should_emit_dictation_support, file_empty \
         = parse_input(Input_name, In_folder, Extension_functions, Debug)
+    
     if error_count == 0:
         check_forward_references()
 
@@ -308,10 +320,10 @@ def convert_file(in_file, out_folder, suffix):
         try:
             OUT = open(out_file, "w")
             OUT.close()
-        except IOError as e:
+        except OSError as e:
             print_log("Couldn't open output file '" + out_file + "' for writing")
-        print_log("Converting " + Input_name)
-        print_log("  Warning: no commands in file.")
+        # print_log("Converting " + Input_name)
+        # print_log("  Warning: no commands in file.")
         return
 
     from vcl2py.emit import output

@@ -120,6 +120,6 @@ from vcl2py.main import main_routine
 # ---------------------------------------------------------------------------
 # Okay, let's run!
 
-main_routine();
+main_routine()
 #import profile
 #profile.run('main_routine()')

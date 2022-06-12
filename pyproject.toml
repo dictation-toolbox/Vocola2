@@ -11,16 +11,15 @@ maintainer-email = "q.hoogenboom@antenna.nl"
 home-page = "http://vocola.net/v2/"
 description-file = "README.md"
 module="vocola2"
-requires=["unimacro",
-          "natlink"]
+requires=["unimacro", "dtactions"]
 		
 classifiers=[	"Development Status :: 4 - Beta",
-				"Topic :: Multimedia :: Sound/Audio :: Speech",
-				"Topic :: Scientific/Engineering :: Human Machine Interfaces",
+	"Topic :: Multimedia :: Sound/Audio :: Speech",
+	"Topic :: Scientific/Engineering :: Human Machine Interfaces",
 				]
 				
 requires-python = ">=3.8"
-keywords="dragon,speech,dictation,dictation-toolobx,unimacro,natlink"
+keywords="dragon,speech,dictation,dictation-toolbox,unimacro,natlink"
 
 [tool.flit.scripts]
 

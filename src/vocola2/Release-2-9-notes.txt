@@ -1,0 +1,28 @@
+This is a complete makeover, for letting Vocola2 work with the Python3 installer of Natlink.
+
+2.9.0:
+-you can now pip install vocola2
+-configure your "natlink.ini" file with something like:
+[directories]
+Vocola = C:\Python38-32\Lib\site-packages\vocola2
+VocolaGrammars = ~\.natlink\VocolaGrammars
+
+[vocola]
+vocola_user_directory = ~/.natlink/VocolaUser
+
+
+
+-the _vocola_main.py is in Vocola, it generates python grammar files into the 
+ VocolaGrammars directory.
+-the VocolaUserDirectory is configured in the [vocola] section.
+
+*** work to be done:
+-The synchronising of .vcl to .py files is not working yet, probably because the "hidden_call"
+ has some delay.
+
+-Additional options, with vocola_takes_languages etc. are not tested yet
+
+-The coupling with Unimacro actions is not working yet, should be converted to "dtactions".
+
+Quintijn Hoogenboom, March 3, 2022
+

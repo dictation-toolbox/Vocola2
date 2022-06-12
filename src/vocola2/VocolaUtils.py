@@ -27,14 +27,15 @@
 ### OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ### DEALINGS IN THE SOFTWARE.
 ###
+#pylint:disable=C0116, C0114, C0115, R0911
+#pylint:disable=E1101
 
 import re
 import sys
-from   types import *
 import traceback  # for debugging traceback code in handle_error
 
 import natlink
-import natlinkutils
+from natlink import natlinkutils
 
 ##
 ## Global variables:
@@ -104,17 +105,15 @@ def handle_error(filename, line, command, exception):
     print("the following error occurred:", file=sys.stderr)
     print("    " + exception.__class__.__name__ + ": " \
         + str(exception), file=sys.stderr)
-    #traceback.print_exc()
+    traceback.print_exc()
     #raise exception
 
 
 def to_long(string):
     try:
         return int(string)
-    except ValueError:
-        raise VocolaRuntimeError("unable to convert '"
-                                 + "'".replace("''")
-                                 + "' into an integer")
+    except ValueError as exc:
+        raise VocolaRuntimeError(f'unable to convert "{string}" into an integer') from exc
 
 def do_flush(functional_context, buffer):
     if functional_context:
@@ -122,10 +121,10 @@ def do_flush(functional_context, buffer):
             'attempt to call Unimacro, Dragon, or a Vocola extension ' +
             'procedure in a functional context!')
     if buffer != '':
+        # new_keys = convert_keys(buffer)
+        # print(f'buffer: "{buffer}", new_keys: "{new_keys}"')
         natlinkutils.playString(convert_keys(buffer))
     return ''
-
-
 
 ##
 ## Dragon built-ins:
@@ -154,22 +153,30 @@ def convert_keys(keys):
     return keys
 
 def name_for_shift():
+    """function to be checked,
+    
+    here it tests against the language of the user profile, but it should test
+    against the language of the keyboard.
+    
+    And not necessary any more now the key doubling or missing problem with natlink.playString
+    has been avoided in favour of sendkeys function... (natlinkutils.playString)
+    """
     if SystemLanguage == "enx":
         return "shift"
-    elif SystemLanguage == "nld":
+    if SystemLanguage == "nld":
         return "shift"
-    elif SystemLanguage == "fra":
+    if SystemLanguage == "fra":
         return "Maj"
-    elif SystemLanguage == "deu":
+    if SystemLanguage == "deu":
         return "Umschalt"
-    elif SystemLanguage == "ita":
+    if SystemLanguage == "ita":
         return "MAIUSC"
-    elif SystemLanguage == "esp":
+    if SystemLanguage == "esp":
         return "MAYÚS"
-    else:
-        return None
+    return "shift"
 
 def call_Dragon(function_name, argument_types, arguments):
+    #pylint:disable=W0603
     global dragon_prefix
 
     def quoteAsVisualBasicString(argument):
@@ -187,8 +194,7 @@ def call_Dragon(function_name, argument_types, arguments):
         if argument_type == 'i':
             argument = str(to_long(argument))
         elif argument_type == 's':
-            if function_name == "SendDragonKeys" or function_name == "SendKeys" \
-                    or function_name == "SendSystemKeys":
+            if function_name in ("SendDragonKeys", "SendKeys", "SendSystemKeys"):
                 argument = convert_keys(argument)
             argument = quoteAsVisualBasicString(str(argument))
         else:
@@ -211,14 +217,12 @@ def call_Dragon(function_name, argument_types, arguments):
             dragon_prefix = script + chr(10)
         else:
             natlink.execScript(script)
-    except Exception as e:
+    except Exception as exc:
         m = "when Vocola called Dragon to execute:\n" \
             + '        ' + script + '\n' \
             + '    Dragon reported the following error:\n' \
-            + '        ' + type(e).__name__ + ": " + str(e)
-        raise VocolaRuntimeError(m)
-
-
+            + '        ' + type(exc).__name__ + ": " + str(exc)
+        raise VocolaRuntimeError(m) from exc
 
 ##
 ## Unimacro built-in:
@@ -226,12 +230,13 @@ def call_Dragon(function_name, argument_types, arguments):
 
 # attempt to import Unimacro, suppressing errors, and noting success status:
 unimacro_available = False
+unimacroactions = None
 try:
-    import actions
+    from dtactions.unimacro import unimacroactions
     unimacro_available = True
 except ImportError:
     pass
-except IOError:
+except OSError:
     # print 'cannot open Unimacro actions file'
     pass
 
@@ -239,15 +244,15 @@ def call_Unimacro(argumentString):
     if unimacro_available:
         #print '[' + argumentString + ']'
         try:
-            actions.doAction(argumentString)
-        except Exception as e:
+            unimacroactions.doAction(argumentString)
+        except Exception as exc:
             # traceback.print_exc()
             m = "when Vocola called Unimacro to execute:\n" \
                 + '        Unimacro(' + argumentString + ')\n' \
                 + '    Unimacro reported the following error:\n' \
-                + '        ' + type(e).__name__ + ": " + str(e) 
+                + '        ' + type(exc).__name__ + ": " + str(exc)
                 
-            raise VocolaRuntimeError(m)
+            raise VocolaRuntimeError(m) from exc
     else:
         m = '\n'.join(['Unimacro call failed because ',
                        '    the link with Unimacro is unavailable.',
@@ -263,6 +268,7 @@ def call_Unimacro(argumentString):
 ##
 
 def eval_template(template, *arguments):
+    #pylint:disable=W0123    
     variables = {}
 
     waiting = list(arguments)
@@ -289,25 +295,24 @@ def eval_template(template, *arguments):
         descriptor = m.group()
         if descriptor == "%%":
             return "%"
-        elif descriptor == "%s":
+        if descriptor == "%s":
             return get_variable(str(get_argument()))
-        elif descriptor == "%i":
+        if descriptor == "%i":
             return get_variable(to_long(get_argument()))
-        elif descriptor == "%a":
+        if descriptor == "%a":
             a = get_argument()
             if isCanonicalNumber(a):
                 return get_variable(int(a))
-            else:
-                return get_variable(str(a))
-        else:
-            return descriptor
+            return get_variable(str(a))
+        # # else:
+        return descriptor
 
     expression = re.sub(r'%.', handle_descriptor, template)
     try:
         return eval('str(' + expression + ')', variables.copy())
     except VocolaRuntimeAbort:
         raise
-    except Exception as e:
+    except Exception as exc:
         m = "when Eval[Template] called Python to evaluate:\n" \
             + '        str(' + expression + ')\n' \
             + '    under the following bindings:\n'
@@ -316,5 +321,5 @@ def eval_template(template, *arguments):
         for v in names:
             m += '        ' + str(v) + ' -> ' + repr(variables[v]) + '\n'
         m += '    Python reported the following error:\n' \
-            + '        ' + type(e).__name__ + ": " + str(e)
-        raise VocolaRuntimeError(m)
+            + '        ' + type(exc).__name__ + ": " + str(exc)
+        raise VocolaRuntimeError(m) from exc

@@ -1,9 +1,9 @@
 import re
 import os
 
-from vcl2py.ast import *
-from vcl2py.lex import *
-from vcl2py.log import *
+from vocola2.exec.vcl2py.ast import *
+from vocola2.exec.vcl2py.lex import *
+from vocola2.exec.vcl2py.log import *
 
 
 def parse_input(in_file, in_folder, extension_functions, debug):
@@ -197,7 +197,7 @@ def read_file(in_file):
     global Last_include_position
     try:
         return open(in_file).read()
-    except (IOError, OSError) as e:
+    except OSError as e:
         log_error("Unable to open or read '" + in_file + "'", # + ": " + str(e),
                   Last_include_position)
         return ""
@@ -886,7 +886,7 @@ def check_forward_references():
 
 
 
-import vcl2py.lex as lex
+import vocola2.exec.vcl2py.lex as lex
 lex.log_error = log_error  # temporary kludge
-import vcl2py.emit as emit
+import vocola2.exec.vcl2py.emit as emit
 emit.log_error = log_error  # temporary kludge
