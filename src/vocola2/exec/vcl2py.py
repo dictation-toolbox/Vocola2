@@ -114,7 +114,7 @@
 #   Global variables are capitalized (e.g. Definitions)
 #   Local variables are lowercase    (e.g. in_folder)
 
-from vcl2py.main import main_routine
+from vocola2.exec.vcl2py.main import main_routine
 
 
 # ---------------------------------------------------------------------------
