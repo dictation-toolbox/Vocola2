@@ -42,7 +42,7 @@ import shutil
 import subprocess
 import re
 import logging
-from natlink import _natlink_core as natlink
+import natlink
 from natlinkcore import natlinkutils
 import VocolaUtils
 # import natlinkvocolastartup  # was natlinkstartup in natlinkmain...

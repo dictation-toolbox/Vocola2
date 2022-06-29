@@ -34,7 +34,7 @@ import re
 import sys
 import traceback  # for debugging traceback code in handle_error
 
-from natlink import _natlink_core as natlink
+import natlink
 from natlinkcore import natlinkutils
 
 ##
