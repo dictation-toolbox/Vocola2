@@ -43,9 +43,9 @@ import subprocess
 import re
 import logging
 import natlink
-from natlink import natlinkutils
+from natlinkcore import natlinkutils
 import VocolaUtils
-import natlinkvocolastartup  # was natlinkstartup in natlinkmain...
+# import natlinkvocolastartup  # was natlinkstartup in natlinkmain...
 from vocola2.exec.vcl2py.main import main_routine     # main.main_routine  compile function
 import __init__
 
@@ -58,9 +58,9 @@ thisDir = os.path.split(__file__)[0]
 ##########################################################################
 
 try:
-    from natlink import natlinkstatus
-    from natlink import loader  
-    from natlink import config    ## only needed when debugging probably
+    from natlinkcore import natlinkstatus
+    from natlinkcore import loader  
+    from natlinkcore import config    ## only needed when debugging probably
     Quintijn_installer = True
     status             = natlinkstatus.NatlinkStatus()
 
@@ -263,13 +263,13 @@ class ThisGrammar(natlinkutils.GrammarBase):
     """
     elif language != 'enx':
         print("""\n\n
-Vocola Warning: no language "%s" translations for the built-in Vocola
+Vocola Warning: no language "{language}" translations for the built-in Vocola
 commands (e.g., commands to load voice commands) are currently
 available; consider helping translate them -- inquire on
 https://www.knowbrainer.com/forums/forum/categories.cfm?catid=25.  For
 now the English versions, like "Edit Commands" and "Edit Global
 Commands" are activated.
-""" % language, file=sys.stderr)
+""", file=sys.stderr)
 
     def initialize(self):
         if 'COMPUTERNAME' in os.environ:
@@ -449,9 +449,8 @@ Commands" are activated.
         if not path:
             path = commandFolder + '\\' + file
 
-            new = open(path, 'w')
-            new.write('# ' + comment + '\n\n')
-            new.close()
+            with open(path, 'w', encoding='ascii') as fp:
+                fp.write(f'# {comment} \n\n')
 
         #
         # Natlink/DNS bug causes os.startfile or wpi32api.ShellExecute

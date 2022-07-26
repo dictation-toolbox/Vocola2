@@ -664,7 +664,7 @@ def emit_file_header():
     print("#pylint:disable=W0401, W0614, E1101", file=OUT)
     print('''
 import natlink
-from natlink import natlinkutils
+from natlinkcore import natlinkutils
 from vocola2.VocolaUtils import *
 
 

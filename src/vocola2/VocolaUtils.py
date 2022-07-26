@@ -35,7 +35,7 @@ import sys
 import traceback  # for debugging traceback code in handle_error
 
 import natlink
-from natlink import natlinkutils
+from natlinkcore import natlinkutils
 
 ##
 ## Global variables:
