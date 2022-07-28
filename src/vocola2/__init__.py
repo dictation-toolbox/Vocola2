@@ -1,6 +1,6 @@
 """Vocola"""
 
-__version__ = '3.1.0'  # natlink forlder/import changes
+__version__ = '3.1.1'  # natlink forlder/import changes
 #'2.9.5'  # make ready for improved pip
 #             '2.9.4'  # bugfix, check for correct directories (VocolaUserDirectory, VocolaGrammarsDirectory)
 #             '2.9.3'  # bugfix, typo
