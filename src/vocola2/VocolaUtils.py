@@ -28,15 +28,14 @@
 ### DEALINGS IN THE SOFTWARE.
 ###
 #pylint:disable=C0116, C0114, C0115, R0911
-#pylint:disable=E1101
+#pylint:disable=E1101, C2503
 
 import re
 import sys
 import traceback  # for debugging traceback code in handle_error
 
 import natlink
-from natlinkcore import natlinkutils
-
+from vocola2.extensions import vocola_ext_keys
 ##
 ## Global variables:
 ##
@@ -123,7 +122,8 @@ def do_flush(functional_context, buffer):
     if buffer != '':
         # new_keys = convert_keys(buffer)
         # print(f'buffer: "{buffer}", new_keys: "{new_keys}"')
-        natlinkutils.playString(convert_keys(buffer))
+        # replacing natlinkutils.playString or natlink.playString
+        vocola_ext_keys.send_input(convert_keys(buffer))
     return ''
 
 ##
