@@ -1,6 +1,6 @@
 """Vocola"""
 
-__version__ = '3.1.2'  # august 2022
+__version__ = '3.1.3'  # sept 2022, send_input/sendkeys
 #             '3.1.1'  # natlink folder/import changes
 #'2.9.5'  # make ready for improved pip
 #             '2.9.4'  # bugfix, check for correct directories (VocolaUserDirectory, VocolaGrammarsDirectory)
