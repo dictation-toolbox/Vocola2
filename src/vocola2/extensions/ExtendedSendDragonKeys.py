@@ -50,8 +50,6 @@ def senddragonkeys_to_events(input, ignore_unknown_names=True):
 
     return events
 
-    
-
 ### 
 ### Break SendDragonKeys input into the chords that make it up.  Each
 ### chord is represented in terms of its three parts: modifiers, base,
