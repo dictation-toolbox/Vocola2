@@ -44,7 +44,6 @@ import win32con
 ## 
 
 def send_input(events):
-    print(f'send_input events: {events}')
     inputs = [e.to_input() for e in events]
     input = (Input * len(events))(*inputs)
     inserted = windll.user32.SendInput(len(input), byref(input), sizeof(Input))
