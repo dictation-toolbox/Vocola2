@@ -4,7 +4,7 @@ import os
 from vocola2.exec.vcl2py.ast import *
 from vocola2.exec.vcl2py.lex import *
 from vocola2.exec.vcl2py.log import *
-
+from natlinkcore.readwritefile import ReadWriteFile
 
 def parse_input(in_file, in_folder, extension_functions, debug):
     global Input_name, In_folder, Extension_functions, Debug
@@ -196,7 +196,14 @@ def canonicalize_in_file(in_file):
 def read_file(in_file):
     global Last_include_position
     try:
-        return open(in_file).read()
+        rwfile = ReadWriteFile()
+        result = rwfile.readAnything(in_file)
+        if rwfile.encoding != 'ascii':
+            print(f'vocola input file: "{in_file}", encoding is: "{rwfile.encoding}"')
+        return result
+        # 
+        # 
+        # return open(in_file).read()
     except OSError as e:
         log_error("Unable to open or read '" + in_file + "'", # + ": " + str(e),
                   Last_include_position)
