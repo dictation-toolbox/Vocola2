@@ -16,7 +16,6 @@
 from ctypes import *
 import win32con
 
-
 ## 
 ## SendInput function:
 ## 
@@ -498,13 +497,6 @@ def mouse_wheel_event(horizontal, clicks):
 
 # dx>0: moves right, dy>0: moves down
 # absolute: 0..65535 each dim for primary monitor (virtual => entire desktop)
-
-# MOUSEEVENTF from win32con:
-# 'MOUSEEVENTF_ABSOLUTE', 'MOUSEEVENTF_HWHEEL', 'MOUSEEVENTF_LEFTDOWN', 'MOUSEEVENTF_LEFTUP', 'MOUSEEVENTF_MIDDLEDOWN',
-# 'MOUSEEVENTF_MIDDLEUP', 'MOUSEEVENTF_MOVE', 'MOUSEEVENTF_MOVE_NOCOALESCE', 'MOUSEEVENTF_RIGHTDOWN', 'MOUSEEVENTF_RIGHTUP',
-# 'MOUSEEVENTF_VIRTUALDESK', 'MOUSEEVENTF_WHEEL', 'MOUSEEVENTF_XDOWN', 
-
-
 def mouse_move_event(x, y, absolute, virtual=False, coalesce=False):
     flags = win32con.MOUSEEVENTF_MOVE
     if not coalesce:

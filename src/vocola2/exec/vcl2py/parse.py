@@ -199,7 +199,11 @@ def read_file(in_file):
         rwfile = readwritefile.ReadWriteFile()
         result = rwfile.readAnything(in_file)
         # print(f'read: "{in_file}", encoding: "{rwfile.encoding}"')
+
         return result
+        # 
+        # 
+        # return open(in_file).read()
     except OSError as e:
         log_error("Unable to open or read '" + in_file + "'", # + ": " + str(e),
                   Last_include_position)

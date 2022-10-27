@@ -27,7 +27,7 @@
 ### OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 ### DEALINGS IN THE SOFTWARE.
 ###
-#pylint:disable=C0116, C0114, C0115, R0911
+#pylint:disable=C0116, C0114, C0115, R0911, C2503
 #pylint:disable=E1101, C2503
 
 import re
@@ -159,7 +159,7 @@ def name_for_shift():
     against the language of the keyboard.
     
     And not necessary any more now the key doubling or missing problem with natlink.playString
-    has been avoided in favour of sendkeys function... (natlinkutils.playString)
+    has been avoided in favour of sendkeys/send_input function... (natlinkutils.playString)
     """
     if SystemLanguage == "enx":
         return "shift"
@@ -212,7 +212,7 @@ def call_Dragon(function_name, argument_types, arguments):
     #print '[' + script + ']'
     try:
         if function_name == "SendDragonKeys":
-            natlink.playString(convert_keys(arguments[0]))
+            send_input(convert_keys(arguments[0]))
         elif function_name == "ShiftKey":
             dragon_prefix = script + chr(10)
         else:

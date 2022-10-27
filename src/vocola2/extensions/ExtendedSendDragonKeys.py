@@ -15,7 +15,7 @@
 ### Author:  Mark Lillibridge
 ### Version: 1.0
 ### 
-
+#pylint:disable=C0321
 from __future__ import print_function
 
 import sys
@@ -49,6 +49,8 @@ def senddragonkeys_to_events(input, ignore_unknown_names=True):
                 events += chord_to_events([None, char, None, char])
 
     return events
+
+    
 
 ### 
 ### Break SendDragonKeys input into the chords that make it up.  Each

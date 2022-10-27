@@ -107,6 +107,7 @@ you packages in the site-packages directory immediately. You need to restart Dra
 
 -When you are satisfied with a release, take the following steps:
 -change the release number in __init__.py of vocola2.
+- update the version number requirement of any dependancies in pyproject.toml..
 -do a local `pip uninstall vocola2`
 -commit and push your git directory
 
