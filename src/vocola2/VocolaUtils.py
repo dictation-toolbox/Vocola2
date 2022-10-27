@@ -216,6 +216,7 @@ def call_Dragon(function_name, argument_types, arguments):
         elif function_name == "ShiftKey":
             dragon_prefix = script + chr(10)
         else:
+            print(f'calling execScript: {script}')
             natlink.execScript(script)
     except Exception as exc:
         m = "when Vocola called Dragon to execute:\n" \

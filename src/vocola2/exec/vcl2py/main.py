@@ -318,7 +318,7 @@ def convert_file(in_file, out_folder, suffix):
     if file_empty:
         # Write empty output file, for modification time comparisons
         try:
-            OUT = open(out_file, "w")
+            OUT = open(out_file, "w", encoding='latin-1')
             OUT.close()
         except OSError as e:
             print_log("Couldn't open output file '" + out_file + "' for writing")

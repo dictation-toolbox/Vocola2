@@ -30,7 +30,7 @@ ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-#pylint:disable=W0614, W0613, C0116, C0321, W0603, R0201, W0401, C0115, C0412, W0201
+#pylint:disable=W0614, W0613, C0116, C0321, W0603, W0401, C0115, C0412, W0201
 #pylint:disable=E1101
 import sys
 import traceback
@@ -44,8 +44,9 @@ import re
 import logging
 import natlink
 from natlinkcore import natlinkutils
+from natlinkcore import readwritefile
 import VocolaUtils
-# import natlinkvocolastartup  # was natlinkstartup in natlinkmain...
+import natlinkvocolastartup  # was natlinkstartup in natlinkmain...
 from vocola2.exec.vcl2py.main import main_routine     # main.main_routine  compile function
 import __init__
 
@@ -100,8 +101,8 @@ try:
             if not os.path.exists(VocolaUserLanguageDirectory):
                 os.mkdir(VocolaUserLanguageDirectory)
                 
-    ## perform init actions: exclude for testing purposes QH
-    # natlinkvocolastartup.start()
+    ## perform init actions: 
+    natlinkvocolastartup.start()
 except ImportError:
     Quintijn_installer = False
     VocolaEnabled      = True
@@ -448,9 +449,11 @@ Commands" are activated.
         path = self.FindExistingCommandFile(file)
         if not path:
             path = commandFolder + '\\' + file
-
-            with open(path, 'w', encoding='ascii') as fp:
-                fp.write(f'# {comment} \n\n')
+            rwfile = readwritefile.ReadWriteFile()
+            rwfile.writeAnything(path, f'# {comment} \n\n')
+            
+            # with open(path, 'w', encoding='ascii') as fp:
+            #     fp.write(f'# {comment} \n\n')
 
         #
         # Natlink/DNS bug causes os.startfile or wpi32api.ShellExecute
@@ -558,7 +561,6 @@ lastCommandFolderTime = 0
 def compile_changed():
     global lastVocolaFileTime, lastCommandFolderTime
     global compiler_error
-
     current = getLastVocolaFileModTime()
     if current > lastVocolaFileTime:
         # print('load all files, False....')

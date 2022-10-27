@@ -3,13 +3,15 @@
 should be called from Vocola_main
 2021-07-15, QH
 """
+#pylint:disable=C0209
 import os               # access to file information
 import os.path          # to parse filenames
 import stat
 import re
 import shutil
 import sys
-from natlink import natlinkstatus
+from natlinkcore import natlinkstatus
+from natlinkcore import readwritefile
 status = natlinkstatus.NatlinkStatus()
 #
 # This function is called by natlinkmain when starting up just before
@@ -97,7 +99,7 @@ def create_new_language_subdirectory_if_needed():
         commandFolder = None
 
     if VocolaEnabled and status.getVocolaTakesLanguages():
-        if language != 'enx' and commandFolder:
+        if language != 'enx ' and commandFolder:
             uDir  = commandFolder
             uDir2 = os.path.join(uDir, language)
             if not os.path.isdir(uDir2):
@@ -121,14 +123,25 @@ def copyVclFileLanguageVersion(Input, Output):
     reInclude = re.compile(r'^(\s*include\b\s*[\'\"]?)([^\s;=][^;=\n]*\s*;.*)$')
     Input     = os.path.normpath(Input)
     Output    = os.path.normpath(Output)
-    inputString = open(Input, 'r').read()
-    output    = open(Output, 'w')
+    rwfile = readwritefile.ReadWriteFile()
+    inputString = rwfile.readAnything(Input)
+    # inputString = open(Input, 'r').read()
+
+    # output    = open(Output, 'w')
     language      = status.language
-    output.write("# vocola file for alternate language: %s\n"% language)
+    output = [f'# vocola file for alternate language: {language}\n']
+
     lines = list(map(lambda s: s.strip(), inputString.split('\n')))
     for line in lines:
         m = reInclude.match(line)
         if m:
             line = m.group(1) + "..\\" + m.group(2) 
-        output.write(line + '\n')
-    output.close()                
+        output.append(line + '\n')
+    print(f'write to languageversion: {language}: {Output}')
+    rwfile.writeAnything(Output, ''.join(output))
+
+    # output.close()                
+
+if __name__ == "__main__":
+    start()
+    
