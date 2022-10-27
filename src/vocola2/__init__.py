@@ -1,6 +1,8 @@
 """Vocola"""
 
-__version__ = '2.9.6'  # sendkeys again from Vocola, but via dtactions.
+__version__ = '3.1.3'
+## now in versions 3.1. series
+# __version__ = '2.9.6'  # sendkeys again from Vocola, but via dtactions.
 # __version__ = '2.9.5'  # make ready for improved pip
 #             '2.9.4'  # bugfix, check for correct directories (VocolaUserDirectory, VocolaGrammarsDirectory)
 #             '2.9.3'  # bugfix, typo
