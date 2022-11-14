@@ -1,6 +1,6 @@
 """Vocola"""
 
-__version__ = '3.1.4'    # bug fix
+__version__ = '3.1.5'    # bug fix
 ## now in versions 3.1. series
 # __version__ = '2.9.6'  # sendkeys again from Vocola, but via dtactions.
 # __version__ = '2.9.5'  # make ready for improved pip
