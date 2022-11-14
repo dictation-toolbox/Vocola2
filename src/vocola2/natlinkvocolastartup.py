@@ -99,7 +99,7 @@ def create_new_language_subdirectory_if_needed():
         commandFolder = None
 
     if VocolaEnabled and status.getVocolaTakesLanguages():
-        if language != 'enx ' and commandFolder:
+        if language != 'enx' and commandFolder:
             uDir  = commandFolder
             uDir2 = os.path.join(uDir, language)
             if not os.path.isdir(uDir2):
