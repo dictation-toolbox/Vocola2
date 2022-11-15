@@ -45,10 +45,10 @@ import logging
 import natlink
 from natlinkcore import natlinkutils
 from natlinkcore import readwritefile
-import VocolaUtils
-import natlinkvocolastartup  # was natlinkstartup in natlinkmain...
+from vocola2 import VocolaUtils
+from vocola2 import natlinkvocolastartup  # was natlinkstartup in natlinkmain...
 from vocola2.exec.vcl2py.main import main_routine     # main.main_routine  compile function
-import __init__
+from vocola2 import __init__
 
 thisDir = os.path.split(__file__)[0]
 
@@ -94,9 +94,17 @@ try:
     # print('VocolaEnabled: %s'% VocolaEnabled)
     VocolaUserLanguageDirectory = VocolaUserDirectory
     language           = status.language
+    language_comment_addition = ''  # at new command file
+    include_unimacro_line = ''
+    if status.getVocolaTakesUnimacroActions():
+        include_unimacro_line = 'include Unimacro.vch;\n'
     if language != 'enx':
         print(f'    language: "{language}"')
         if status.getVocolaTakesLanguages():
+            # addition to comment line in new .vcl files () (self.openCommandFile)
+            language_comment_addition = f' (language: {language})'
+            if status.getVocolaTakesUnimacroActions():
+                include_unimacro_line = 'include ..\\Unimacro.vch;\n'
             VocolaUserLanguageDirectory = os.path.join(VocolaUserDirectory, language)
             if not os.path.exists(VocolaUserLanguageDirectory):
                 os.mkdir(VocolaUserLanguageDirectory)
@@ -448,9 +456,10 @@ Commands" are activated.
 
         path = self.FindExistingCommandFile(file)
         if not path:
+            after_comment = self.get_after_comment_new_vcl_file()
             path = commandFolder + '\\' + file
             rwfile = readwritefile.ReadWriteFile()
-            rwfile.writeAnything(path, f'# {comment} \n\n')
+            rwfile.writeAnything(path, f'# {comment}{after_comment}\n')
             
             # with open(path, 'w', encoding='ascii') as fp:
             #     fp.write(f'# {comment} \n\n')
@@ -472,7 +481,11 @@ Commands" are activated.
         #    os.spawnv(os.P_NOWAIT, prog, [prog, path])
         natlink.execScript("AppBringUp \"" + path + "\", \"" + path + "\"")
 
-
+    def get_after_comment_new_vcl_file(self):
+        """get language dependent and unimacro actions dependent start
+        of a new vcl command file
+        """
+        return f'{language_comment_addition}\n{include_unimacro_line}\n'
 
 ###########################################################################
 #                                                                         #
