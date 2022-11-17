@@ -92,18 +92,21 @@ The current Vocola2 is partly stable, and can be installed via pip:
 Instructions for installing the latest released version can be found at
 http://vocola.net/v2/InstallVocola.asp
 
-##Instructions for the developers
+## Instructions for the developers
 
 To install the version checked out in your git repository,
 -first uninstall vocola:
-`pip uninstall vocola2`
-
+```
+pip uninstall vocola2
+```
 -In your root of your repository:  
-`build_package`
-`flit install --symlink`
+```flit build
+pip install -e .
+```
+
 
 -You can now edit the files in your (Forked) repository, the changes will reflect the state of
-you packages in the site-packages directory immediately. You need to restart Dragon quite often though.
+you packages in the site-packages directory immediately.  
 
 -When you are satisfied with a release, take the following steps:
 -change the release number in __init__.py of vocola2.
@@ -112,8 +115,10 @@ you packages in the site-packages directory immediately. You need to restart Dra
 -commit and push your git directory
 
 Then: 
--`build_package`  (`.ps1` for powershell or `.cmd` for cmd shell)
--`publish_package_pypi` (`.ps1` or `.cmd`)
+```
+flit build
+flit publish
+```
 
 
 ## Tests
