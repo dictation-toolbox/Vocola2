@@ -94,17 +94,10 @@ try:
     # print('VocolaEnabled: %s'% VocolaEnabled)
     VocolaUserLanguageDirectory = VocolaUserDirectory
     language           = status.language
-    language_comment_addition = ''  # at new command file
-    include_unimacro_line = ''
-    if status.getVocolaTakesUnimacroActions():
-        include_unimacro_line = 'include Unimacro.vch;\n'
     if language != 'enx':
         print(f'    language: "{language}"')
         if status.getVocolaTakesLanguages():
             # addition to comment line in new .vcl files () (self.openCommandFile)
-            language_comment_addition = f' (language: {language})'
-            if status.getVocolaTakesUnimacroActions():
-                include_unimacro_line = 'include ..\\Unimacro.vch;\n'
             VocolaUserLanguageDirectory = os.path.join(VocolaUserDirectory, language)
             if not os.path.exists(VocolaUserLanguageDirectory):
                 os.mkdir(VocolaUserLanguageDirectory)
@@ -485,6 +478,16 @@ Commands" are activated.
         """get language dependent and unimacro actions dependent start
         of a new vcl command file
         """
+        language_comment_addition = ''  # at new command file
+        include_unimacro_line = ''
+        if status.getVocolaTakesLanguages():
+            if language != 'enx':
+                language_comment_addition = f' (language: {language})'
+
+        if status.getVocolaTakesUnimacroActions():
+            include_unimacro_line = 'include Unimacro.vch;\n'
+            if status.getVocolaTakesLanguages() and language != 'enx':
+                include_unimacro_line = 'include ..\\Unimacro.vch;\n'
         return f'{language_comment_addition}\n{include_unimacro_line}\n'
 
 ###########################################################################
