@@ -48,8 +48,17 @@ from natlinkcore import readwritefile
 from vocola2 import VocolaUtils
 from vocola2 import natlinkvocolastartup  # was natlinkstartup in natlinkmain...
 from vocola2.exec.vcl2py.main import main_routine     # main.main_routine  compile function
-from vocola2 import __init__
+from importlib.metadata import version
+from pathlib import Path
 
+
+#we don't know if it will be vocola2 or vocola or None 
+#depending on how this package is installed.  So 
+#check the path if no __package__ specified.
+packageName = __package__ if __package__ is not None else \
+    Path(__file__).parent.name
+
+thisVersion=version(packageName)  #get the version of this package.
 thisDir = os.path.split(__file__)[0]
 
 ##########################################################################
@@ -736,11 +745,11 @@ thisGrammar = None
 # date (e.g., new compiler, source file deleted, partially written due
 # to crash, new machine name, etc.):
 purgeOutput()
-
+versionString=f'Vocola Version "{thisVersion}"'
 if not VocolaEnabled:
-    print("Vocola not active")
+    print(f"{versionString}  Not Active")
 else:
-    print(f'Vocola version "{__init__.__version__}" starting...')
+    print(f'{versionString} starting...')
     thisGrammar = ThisGrammar()
     thisGrammar.initialize()
     natlinkmain.set_on_mic_on_callback(vocolaMicOnCallback)
