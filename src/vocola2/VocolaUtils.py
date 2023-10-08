@@ -28,15 +28,14 @@
 ### DEALINGS IN THE SOFTWARE.
 ###
 #pylint:disable=C0116, C0114, C0115, R0911, C2503
-#pylint:disable=E1101
+#pylint:disable=E1101, C2503
 
 import re
 import sys
 import traceback  # for debugging traceback code in handle_error
 
 import natlink
-from send_input import send_input
-
+from vocola2.extensions import vocola_ext_keys
 ##
 ## Global variables:
 ##
@@ -123,7 +122,8 @@ def do_flush(functional_context, buffer):
     if buffer != '':
         # new_keys = convert_keys(buffer)
         # print(f'buffer: "{buffer}", new_keys: "{new_keys}"')
-        send_input(convert_keys(buffer))
+        # replacing natlinkutils.playString or natlink.playString
+        vocola_ext_keys.send_input(convert_keys(buffer))
     return ''
 
 ##
@@ -146,9 +146,10 @@ def convert_keys(keys):
 
     # prefix with current SystemLanguage appropriate version of {shift}
     # to prevent doubling/dropping bug:
-    shift = name_for_shift()
-    if shift:
-        keys = "{" + shift + "}" + keys
+    # try to switch off shift trick QH 2323-10-08
+    # shift = name_for_shift()
+    # if shift:
+    #     keys = "{" + shift + "}" + keys
 
     return keys
 
@@ -216,6 +217,7 @@ def call_Dragon(function_name, argument_types, arguments):
         elif function_name == "ShiftKey":
             dragon_prefix = script + chr(10)
         else:
+            print(f'calling execScript: {script}')
             natlink.execScript(script)
     except Exception as exc:
         m = "when Vocola called Dragon to execute:\n" \

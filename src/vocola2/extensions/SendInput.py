@@ -13,7 +13,6 @@
 ### Version: 0.8
 ### 
 #pylint:disable = W0622, R0903, C0321, 
-
 from ctypes import *
 import win32con
 
@@ -48,7 +47,7 @@ def send_input(events):
     input = (Input * len(events))(*inputs)
     inserted = windll.user32.SendInput(len(input), byref(input), sizeof(Input))
     if inserted != len(events):
-        raise ValueError("windll.user32.SendInput: ???")  ## + FormatMessage())
+        raise ValueError("windll.user32.SendInput") # + FormatMessage())
 
 
 ## 
@@ -485,8 +484,8 @@ def mouse_button_event(button, releasing=False):
         if releasing: flags = up_flag
         
         return MouseInput(0, 0, mouse_data, flags, 0)
-    except KeyError:
-        raise ValueError("unknown mouse button: " + button)
+    except KeyError as exc:
+        raise ValueError("unknown mouse button: " + button) from exc
 
 
 # clicks>0 => wheel rotated forward (if horizontal false) or else rotated right
@@ -501,7 +500,7 @@ def mouse_wheel_event(horizontal, clicks):
 def mouse_move_event(x, y, absolute, virtual=False, coalesce=False):
     flags = win32con.MOUSEEVENTF_MOVE
     if not coalesce:
-        flags |= win32con.MOUSEEVENTF_MOVE_NOCOALESCE   
+        flags |= win32con.MOUSEEVENTF_MOVE_NOCOALESCE      # was: MOUSEEVENTF_NOCOALESCE
     if absolute: 
         flags |= win32con.MOUSEEVENTF_ABSOLUTE
         if virtual:

@@ -6,6 +6,8 @@
 
 from dtactions.vocola_sendkeys import ExtendedSendDragonKeys
 from dtactions.vocola_sendkeys import SendInput
+# from vocola2.extensions import ExtendedSendDragonKeys
+# from vocola2.extensions import SendInput
 
 # Vocola procedure: Keys.SendInput
 def send_input(specification):

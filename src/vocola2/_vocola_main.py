@@ -30,7 +30,7 @@ ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-#pylint:disable=W0614, W0613, C0116, C0321, W0603, R0201, W0401, C0115, C0412, W0201
+#pylint:disable=W0614, W0613, C0116, C0321, W0603, W0401, C0115, C0412, W0201
 #pylint:disable=E1101
 import sys
 import traceback
@@ -44,11 +44,21 @@ import re
 import logging
 import natlink
 from natlinkcore import natlinkutils
-import VocolaUtils
-# import natlinkvocolastartup  # was natlinkstartup in natlinkmain...
+from natlinkcore import readwritefile
+from vocola2 import VocolaUtils
+from vocola2 import natlinkvocolastartup  # was natlinkstartup in natlinkmain...
 from vocola2.exec.vcl2py.main import main_routine     # main.main_routine  compile function
-import __init__
+from importlib.metadata import version
+from pathlib import Path
 
+
+#we don't know if it will be vocola2 or vocola or None 
+#depending on how this package is installed.  So 
+#check the path if no __package__ specified.
+packageName = __package__ if __package__ is not None else \
+    Path(__file__).parent.name
+
+thisVersion=version(packageName)  #get the version of this package.
 thisDir = os.path.split(__file__)[0]
 
 ##########################################################################
@@ -96,12 +106,13 @@ try:
     if language != 'enx':
         print(f'    language: "{language}"')
         if status.getVocolaTakesLanguages():
+            # addition to comment line in new .vcl files () (self.openCommandFile)
             VocolaUserLanguageDirectory = os.path.join(VocolaUserDirectory, language)
             if not os.path.exists(VocolaUserLanguageDirectory):
                 os.mkdir(VocolaUserLanguageDirectory)
                 
-    ## perform init actions: exclude for testing purposes QH
-    # natlinkvocolastartup.start()
+    ## perform init actions: 
+    natlinkvocolastartup.start()
 except ImportError:
     Quintijn_installer = False
     VocolaEnabled      = True
@@ -355,7 +366,7 @@ Commands" are activated.
     # Load all command files
     def loadAllFiles(self, force):
         if commandFolder:
-            print(f'loadAllFiles: {commandFolder}, force: {force}')
+            # print(f'loadAllFiles: {commandFolder}, force: {force}')
             compile_Vocola(commandFolder, force)
 
     # Load command files for specific application
@@ -447,10 +458,13 @@ Commands" are activated.
 
         path = self.FindExistingCommandFile(file)
         if not path:
+            after_comment = self.get_after_comment_new_vcl_file()
             path = commandFolder + '\\' + file
-
-            with open(path, 'w', encoding='ascii') as fp:
-                fp.write(f'# {comment} \n\n')
+            rwfile = readwritefile.ReadWriteFile()
+            rwfile.writeAnything(path, f'# {comment}{after_comment}\n')
+            
+            # with open(path, 'w', encoding='ascii') as fp:
+            #     fp.write(f'# {comment} \n\n')
 
         #
         # Natlink/DNS bug causes os.startfile or wpi32api.ShellExecute
@@ -469,7 +483,21 @@ Commands" are activated.
         #    os.spawnv(os.P_NOWAIT, prog, [prog, path])
         natlink.execScript("AppBringUp \"" + path + "\", \"" + path + "\"")
 
+    def get_after_comment_new_vcl_file(self):
+        """get language dependent and unimacro actions dependent start
+        of a new vcl command file
+        """
+        language_comment_addition = ''  # at new command file
+        include_unimacro_line = ''
+        if status.getVocolaTakesLanguages():
+            if language != 'enx':
+                language_comment_addition = f' (language: {language})'
 
+        if status.getVocolaTakesUnimacroActions():
+            include_unimacro_line = 'include Unimacro.vch;\n'
+            if status.getVocolaTakesLanguages() and language != 'enx':
+                include_unimacro_line = 'include ..\\Unimacro.vch;\n'
+        return f'{language_comment_addition}\n{include_unimacro_line}\n'
 
 ###########################################################################
 #                                                                         #
@@ -558,7 +586,6 @@ lastCommandFolderTime = 0
 def compile_changed():
     global lastVocolaFileTime, lastCommandFolderTime
     global compiler_error
-
     current = getLastVocolaFileModTime()
     if current > lastVocolaFileTime:
         # print('load all files, False....')
@@ -574,7 +601,7 @@ def compile_changed():
     source_changed = False
     if commandFolder:
         if vocolaGetModTime(commandFolder) > lastCommandFolderTime:
-            print(f'commandFolder changed, {lastCommandFolderTime}')
+            # print(f'commandFolder changed, {lastCommandFolderTime}')
             lastCommandFolderTime = vocolaGetModTime(commandFolder)
             source_changed = True
     if source_changed:
@@ -630,11 +657,11 @@ lastNatLinkModTime = 0
 #   2: one or more new .py files may have been created, plus maybe existing changed
 def output_changes():
     #pylint:disable=W0603
+    #called from vocolaBeginUtteranceCallback
     global lastNatLinkModTime, may_have_compiled
 
     old_may_have_compiled = may_have_compiled
     may_have_compiled = False
-
     current = vocolaGetModTime(VocolaGrammarsDirectory)
     if current > lastNatLinkModTime:
         lastNatLinkModTime = current
@@ -688,7 +715,7 @@ def vocolaBeginUtteranceCallback():
         changes = output_changes()
         if changes:
             # set loader to 1 time trigger_load at beginCallback:
-            # print(f'_vocola_main, vocolaBeginCallback, changes: {changes}')
+            print(f'_vocola_main, vocolaBeginUtteranceCallback, changes: {bool(changes)}')
             natlinkmain.set_load_on_begin_utterance(1)
 
 
@@ -704,7 +731,7 @@ def vocolaMicOnCallback():
         compile_changed()
         changes = output_changes()
         if changes:
-            print(f'_vocola_main, vocolaMicOnCallback, changes: {changes}')
+            print(f'_vocola_main, vocolaMicOnCallback, changes: {bool(changes)}')
 
 ###########################################################################
 #                                                                         #
@@ -718,11 +745,11 @@ thisGrammar = None
 # date (e.g., new compiler, source file deleted, partially written due
 # to crash, new machine name, etc.):
 purgeOutput()
-
+versionString=f'Vocola Version "{thisVersion}"'
 if not VocolaEnabled:
-    print("Vocola not active")
+    print(f"{versionString}  Not Active")
 else:
-    print(f'Vocola version "{__init__.__version__}" starting...')
+    print(f'{versionString} starting...')
     thisGrammar = ThisGrammar()
     thisGrammar.initialize()
     natlinkmain.set_on_mic_on_callback(vocolaMicOnCallback)
