@@ -1,6 +1,6 @@
 """Vocola"""
 
-__version__='3.1.7' #new dtactions
+__version__='3.1.8:' #new dtactions
 #__version__ = '3.1.6'    # bug fix/enhancing different takes languages and take unimacro actions comments for new vcl files.
 ## now in versions 3.1. series
 # __version__ = '2.9.6'  # sendkeys again from Vocola, but via dtactions.
