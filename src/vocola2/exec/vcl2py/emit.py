@@ -39,7 +39,7 @@ def emit_output(out_file, statements):
     global Should_emit_dictation_support, OUT
     # OUT is now a list, which is written in one stroke 
     OUT = []
-    OUT = open(out_file, "w", encoding='latin-1')
+    # OUT = open(out_file, "w", encoding='latin-1')
     #     encoding = 'utf-8'
     #     print(f'opening vocola output file: {out_file}')
     #     OUT = open(out_file, "w")
