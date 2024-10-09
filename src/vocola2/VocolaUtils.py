@@ -233,7 +233,7 @@ def call_Dragon(function_name, argument_types, arguments):
 unimacro_available = False
 unimacroactions = None
 try:
-    from dtactions.unimacro import unimacroactions
+    from dtactions import unimacroactions
     unimacro_available = True
 except ImportError:
     pass
