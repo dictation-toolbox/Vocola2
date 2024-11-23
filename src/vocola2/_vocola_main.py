@@ -366,7 +366,7 @@ Commands" are activated.
     # Load all command files
     def loadAllFiles(self, force):
         if commandFolder:
-            print(f'loadAllFiles: {commandFolder}, force: {force}')
+            # print(f'loadAllFiles: {commandFolder}, force: {force}')
             compile_Vocola(commandFolder, force)
 
     # Load command files for specific application
@@ -601,7 +601,7 @@ def compile_changed():
     source_changed = False
     if commandFolder:
         if vocolaGetModTime(commandFolder) > lastCommandFolderTime:
-            print(f'commandFolder changed, {lastCommandFolderTime}')
+            # print(f'commandFolder changed, {lastCommandFolderTime}')
             lastCommandFolderTime = vocolaGetModTime(commandFolder)
             source_changed = True
     if source_changed:
@@ -657,11 +657,11 @@ lastNatLinkModTime = 0
 #   2: one or more new .py files may have been created, plus maybe existing changed
 def output_changes():
     #pylint:disable=W0603
+    #called from vocolaBeginUtteranceCallback
     global lastNatLinkModTime, may_have_compiled
 
     old_may_have_compiled = may_have_compiled
     may_have_compiled = False
-
     current = vocolaGetModTime(VocolaGrammarsDirectory)
     if current > lastNatLinkModTime:
         lastNatLinkModTime = current
@@ -715,7 +715,7 @@ def vocolaBeginUtteranceCallback():
         changes = output_changes()
         if changes:
             # set loader to 1 time trigger_load at beginCallback:
-            # print(f'_vocola_main, vocolaBeginCallback, changes: {changes}')
+            print(f'_vocola_main, vocolaBeginUtteranceCallback, changes: {bool(changes)}')
             natlinkmain.set_load_on_begin_utterance(1)
 
 
@@ -731,7 +731,7 @@ def vocolaMicOnCallback():
         compile_changed()
         changes = output_changes()
         if changes:
-            print(f'_vocola_main, vocolaMicOnCallback, changes: {changes}')
+            print(f'_vocola_main, vocolaMicOnCallback, changes: {bool(changes)}')
 
 ###########################################################################
 #                                                                         #

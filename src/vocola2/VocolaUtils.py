@@ -146,9 +146,10 @@ def convert_keys(keys):
 
     # prefix with current SystemLanguage appropriate version of {shift}
     # to prevent doubling/dropping bug:
-    shift = name_for_shift()
-    if shift:
-        keys = "{" + shift + "}" + keys
+    # try to switch off shift trick QH 2323-10-08
+    # shift = name_for_shift()
+    # if shift:
+    #     keys = "{" + shift + "}" + keys
 
     return keys
 

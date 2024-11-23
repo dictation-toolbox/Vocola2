@@ -9,7 +9,7 @@ from dtactions.vocola_sendkeys import ExtendedSendDragonKeys, SendInput
 
 # Vocola procedure: Keys.SendInput
 def send_input(specification):
-    print(f'vocola send_input: {specification}')
+    # print(f'vocola send_input: {specification}')
     SendInput.send_input(
         ExtendedSendDragonKeys.senddragonkeys_to_events(specification))
 
