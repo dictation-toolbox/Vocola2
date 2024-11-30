@@ -1,0 +1,9 @@
+{ "recommendations":     [ 
+    "tamasfe.even-better-toml",
+    "github.vscode-github-actions",
+    "ms-python.vscode-pylance",
+    "ms-python.python",
+    "ms-python.debugpy",
+    "charliermarsh.ruff",
+    "eamodio.gitlens" ] 
+}
