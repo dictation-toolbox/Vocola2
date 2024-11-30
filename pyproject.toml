@@ -12,18 +12,19 @@ authors = [{name = "Mark Lillibridge", email = "mdl@alum.mit.edu"}]
 version="3.1.10.dev2"
 description="Vocola is a voice command language for creating commands to control a computer by voice "
 keywords=["dragon","speech","dictation","dictation-toolbox","natlink", "dtactions"]
+readme = "readme.md"
 
-    classifiers=[
-        "Development Status :: 4 - Beta",
-        "Environment :: Win32 (MS Windows)",
-        "Intended Audience :: Developers",
-        "Operating System :: Microsoft :: Windows",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: Implementation :: CPython",
-        "Topic :: Multimedia :: Sound/Audio :: Speech",
-        "Topic :: Software Development :: Libraries :: Python Modules",
-		"Topic :: Scientific/Engineering :: Human Machine Interfaces",
-        ]
+classifiers=[
+	"Development Status :: 4 - Beta",
+	"Environment :: Win32 (MS Windows)",
+	"Intended Audience :: Developers",
+	"Operating System :: Microsoft :: Windows",
+	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: Implementation :: CPython",
+	"Topic :: Multimedia :: Sound/Audio :: Speech",
+	"Topic :: Software Development :: Libraries :: Python Modules",
+	"Topic :: Scientific/Engineering :: Human Machine Interfaces",
+	]
 
 [project.urls]
 homepage="http://vocola.net/v2/"
