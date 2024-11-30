@@ -76,17 +76,19 @@ try:
 
     ## when natlinkmain is already there, the Logger and Config variables are ignored...
     Logger = logging.getLogger('natlink')
+    Logger.debug(f'checking if Vocola is enabled')
     Config = config.NatlinkConfig.from_first_found_file(loader.config_locations())
     natlinkmain = loader.NatlinkMain(Logger, Config)
     # natlinkmain.setup_logger()
 
     # print('status: %s'% status)
     VocolaEnabled      = bool(status.getVocolaUserDirectory())
-    print(f'VocolaEnabled: {VocolaEnabled}')
+    Logger.info(f'VocolaEnabled: {VocolaEnabled}')
     if VocolaEnabled:
         VocolaGrammarsDirectory = status.getVocolaGrammarsDirectory()
         VocolaUserDirectory = status.getVocolaUserDirectory()
         VocolaDirectory = status.getVocolaDirectory()
+        Logger.debug(f"VocolaGrammarsDirectory: {VocolaGrammarsDirectory}\nVocolaUserDirectory: {VocolaUserDirectory}\nVocolaDirectory: {VocolaDirectory}")
         if not os.path.isdir(VocolaUserDirectory):
             raise OSError(f'VocolaUserDirectory does not exist, please create: "{VocolaUserDirectory}, or re-configure Natlink.')
         if not os.path.isdir(VocolaGrammarsDirectory):
