@@ -28,6 +28,7 @@ keywords=["dragon","speech","dictation","dictation-toolbox","natlink", "dtaction
 [project.urls]
 homepage="http://vocola.net/v2/"
 repository="https://github.com/dictation-toolbox/Vocola2"
+source="https://github.com/dictation-toolbox/vocola2"	
 
 keywords="dragon,speech,dictation,dictation-toolbox,unimacro,natlink"
 [project.optional-dependencies]
@@ -39,9 +40,4 @@ dev = [
 ] 
  
 
-
-[project.urls]
-homepage = "https://vocola.net/v2/"
-repository="https://github.com/dictation-toolbox/vocola2"
-source="https://github.com/dictation-toolbox/vocola2"		
-		
+ 
