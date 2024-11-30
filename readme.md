@@ -28,6 +28,14 @@ Features:
 Complete documentation can be found at the <a
 href="http://vocola.net/">Vocola website</a>.
 
+**Note.  This version in https://github.com/dictation-toolbox/Vocola2 is a fork of an older Vocola 2.8.6 that
+was ported to Python 3 by developers who wanted to use it with Python 3 around 2020.**  We made the effort to
+package Vocola, so it can be installed with pip both from PyPi, github, or as an editable install, and use the logging facility of Python to log messages to the Natlink message window.    We have been using increasing version numbers 3.x to mark progress.  
+
+
+In the meantime, maintainers of the Vocola project have advanced Vocola using the 2.x version numbers.  If you are desiring the features 2.8.7 or later highlighted on 
+https://vocola.net/v2/VocolaVersions, be sure to install Vocola using the directions on that page. Be sure to uninstall any version of Vocola you have installed with pip first.
+
 
 ## Examples
 
@@ -134,3 +142,9 @@ MIT (see LICENSE.txt)
 sample  commands  installed with Vocolas2 will be installed in:
 the Lib\site-packages\vocola2\samples subfolder of your 
 Python installation.  Good ones to start with include msedge.vcl for sending commands to Microsoft Edge.
+
+If you want to use any of these samples, you have to copy them to the Vocola user directory specified in natlink.ini in the vocola section:
+```
+[vocola]
+vocolauserdirectory = ~\Documents\vocola_yourname
+```
