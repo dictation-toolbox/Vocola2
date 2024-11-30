@@ -8,7 +8,7 @@ dependencies=[
 requires-python = ">=3.10"
 name='vocola2'
 authors=[{name="Rick Mohr",email="nowhere@mit.edu"}, {name = "Mark Lillibridge", email= "mdl@alum.mit.edu"}]
-version="3.1.8.dev1"
+version="3.1.7.dev2"
 description="Vocola is a voice command language for creating commands to control a computer by voice "
 
     classifiers=[
