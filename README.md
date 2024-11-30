@@ -134,4 +134,3 @@ MIT (see LICENSE.txt)
 sample  commands  installed with Vocolas2 will be installed in:
 the Lib\site-packages\vocola2\samples subfolder of your 
 Python installation.  Good ones to start with include msedge.vcl for sending commands to Microsoft Edge.
-
