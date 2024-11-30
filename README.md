@@ -87,37 +87,23 @@ Natlink and Vocola2 have been upgraded to Python 3
 -First install Natlink to the latest version.
 
 The current Vocola2 is partly stable, and can be installed via pip:
--pip install vocola2
+```
+pip install  --pre vocola2
+```
+Note  the --pre to get the prelrease versions.
+
 
 Instructions for installing the latest released version can be found at
-http://vocola.net/v2/InstallVocola.asp
+
 
 ## Instructions for the developers
 
 To install the version checked out in your git repository,
--first uninstall vocola:
-```
-pip uninstall vocola2
-```
--In your root of your repository:  
-```flit build
-pip install -e .
-```
+`pip install -e .` in your repository root.
 
-
--You can now edit the files in your (Forked) repository, the changes will reflect the state of
-you packages in the site-packages directory immediately.  
-
--When you are satisfied with a release, take the following steps:
--change the release number in __init__.py of vocola2.
-- update the version number requirement of any dependancies in pyproject.toml..
--do a local `pip uninstall vocola2`
--commit and push your git directory
-
-Then: 
+To build the package, run this in your repository root:
 ```
-flit build
-flit publish
+python -m build
 ```
 
 
