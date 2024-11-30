@@ -3,13 +3,15 @@ requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
 [project]
 dependencies=[
-	"dtactions~=1.6.4.dev3"
+	"dtactions~=1.6.4.dev3",
+  	"natlinkcore >= 5.4.1"
 	]
 requires-python = ">=3.10"
 name='vocola2'
-authors=[{name="Rick Mohr",email="nowhere@mit.edu"}, {name = "Mark Lillibridge", email= "mdl@alum.mit.edu"}]
-version="3.1.7.dev2"
+authors = [{name = "Mark Lillibridge", email = "mdl@alum.mit.edu"}]
+version="3.1.10.dev2"
 description="Vocola is a voice command language for creating commands to control a computer by voice "
+keywords=["dragon","speech","dictation","dictation-toolbox","natlink", "dtactions"]
 
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -37,4 +39,9 @@ dev = [
 ] 
  
 
+
+[project.urls]
+homepage = "https://vocola.net/v2/"
+repository="https://github.com/dictation-toolbox/vocola2"
+source="https://github.com/dictation-toolbox/vocola2"		
 		
