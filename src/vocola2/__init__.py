@@ -1,6 +1,8 @@
 """Vocola"""
 
 #version number now in project.toml
+import importlib.metadata
+__version__ = importlib.metadata.version(__package__)  #version set in pyproject.toml now.
 
 """utility functions, to get calling directory of module (in site-packages),
 
