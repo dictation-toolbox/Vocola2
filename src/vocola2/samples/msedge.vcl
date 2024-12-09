@@ -10,7 +10,7 @@ show history = {Ctrl+h};
 show downloads = {Ctrl+j};
 reload = {Ctrl+r};
 paste and go = {Ctrl+Shift+l};
-#private window = {Ctrl+Shift+n};    #not working in Version 81.0.416.77 (Official build) (64-bit)
+private window = {Ctrl+Shift+n};     
 
 #searching within the page
 find <_anything> = {Ctrl+f} $1;       
