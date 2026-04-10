@@ -3,7 +3,7 @@ requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
 [project]
 dependencies=[
-	"dtactions~=1.6.4.dev3",
+	"dtactions~=1.6.4.dev4",
   	"natlinkcore >= 5.4.1"
 	]
 requires-python = ">=3.10"

@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 #pylint:disable=W0614, W0613, C0116, C0321, W0603, W0401, C0115, C0412, W0201
-#pylint:disable=E1101
+#pylint:disable=E1101, W1203
 import sys
 import traceback
 import os               # access to file information
@@ -42,14 +42,14 @@ import shutil
 import subprocess
 import re
 import logging
+from importlib.metadata import version
+from pathlib import Path
 import natlink
 from natlinkcore import natlinkutils
 from natlinkcore import readwritefile
 from vocola2 import VocolaUtils
 from vocola2 import natlinkvocolastartup  # was natlinkstartup in natlinkmain...
 from vocola2.exec.vcl2py.main import main_routine     # main.main_routine  compile function
-from importlib.metadata import version
-from pathlib import Path
 
 
 #we don't know if it will be vocola2 or vocola or None 
