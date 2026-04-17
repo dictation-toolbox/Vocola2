@@ -6,10 +6,11 @@ dependencies=[
 	"dtactions >=1.6.4",
   	"natlinkcore >= 5.4.2"
 	]
+#
 requires-python = ">=3.10"
 name='vocola2'
 authors = [{name = "Mark Lillibridge", email = "mdl@alum.mit.edu"}]
-version="3.1.10"
+version="3.1.11"
 description="Vocola is a voice command language for creating commands to control a computer by voice "
 keywords=["dragon","speech","dictation","dictation-toolbox","natlink", "dtactions"]
 readme = "readme.md"
