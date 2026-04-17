@@ -76,7 +76,7 @@ try:
 
     ## when natlinkmain is already there, the Logger and Config variables are ignored...
     Logger = logging.getLogger('natlink')
-    Logger.debug('checking if Vocola is enabled')
+    Logger.debug(f'checking if Vocola is enabled')
     Config = config.NatlinkConfig.from_first_found_file(loader.config_locations())
     natlinkmain = loader.NatlinkMain(Logger, Config)
     # natlinkmain.setup_logger()
