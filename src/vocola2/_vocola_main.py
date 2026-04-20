@@ -42,7 +42,7 @@ import shutil
 import subprocess
 import re
 import logging
-from importlib.metadata import version
+from importlib.metadata import version, PackageNotFoundError
 from pathlib import Path
 import natlink
 from natlinkcore import natlinkutils
@@ -53,14 +53,17 @@ from vocola2.exec.vcl2py.main import main_routine     # main.main_routine  compi
 
 
 #we don't know if it will be vocola2 or vocola or None 
-#depending on how this package is installed.  So 
+#depending on how this package is installed or run.  So 
 #check the path if no __package__ specified.
+
+
 packageName = __package__ if __package__ is not None else \
     Path(__file__).parent.name
 
-thisVersion=version(packageName)  #get the version of this package.
-thisDir = os.path.split(__file__)[0]
+loaded_as_package = __package__ is not None
 
+thisVersion = version(packageName) if loaded_as_package else "unknown (not loaded as package)" 
+thisDir = os.path.split(__file__)[0]
 ##########################################################################
 #                                                                        #
 # Configuration                                                           #
@@ -74,8 +77,17 @@ try:
     Quintijn_installer = True
     status             = natlinkstatus.NatlinkStatus()
 
+    if not loaded_as_package:
+        try:
+            vocola2Version=version("vocola2")
+        except PackageNotFoundError:
+            vocola2Version = "unknown"
+        thisVersion += f"\nvocola2 version known to be: {vocola2Version}"
+
     ## when natlinkmain is already there, the Logger and Config variables are ignored...
     Logger = logging.getLogger('natlink')
+    Logger.debug(f"Vocala starting version: {thisVersion}\nSource file {__file__}")
+
     Logger.debug(f'checking if Vocola is enabled')
     Config = config.NatlinkConfig.from_first_found_file(loader.config_locations())
     natlinkmain = loader.NatlinkMain(Logger, Config)
