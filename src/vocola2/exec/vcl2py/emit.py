@@ -401,7 +401,7 @@ def emit_call(buffer, functional, call, indent):
         elif callName == "Unimacro":
             print('Call to "Unimacro" becoming obsolete, change eventually "Usc" (Uniactions shorthand command)')
             emit_call_usc(buffer, functional, call, indent)
-        elif callName == "Usc":
+        elif callName in ["Usc", "usc"]:
             emit_call_usc(buffer, functional, call, indent)
         elif callName == "When":
             emit_call_when(buffer, functional, call, indent)

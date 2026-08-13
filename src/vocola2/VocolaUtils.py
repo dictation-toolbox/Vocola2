@@ -230,10 +230,10 @@ def call_Dragon(function_name, argument_types, arguments):
         raise VocolaRuntimeError(m) from exc
 
 ##
-## Uniactions built-in:
+## Uniactions built-in: 
 ##
 
-def call_Uniactions(argumentString):
+def call_usc(argumentString):
     #print '[' + argumentString + ']'
     try:
         uactions.doAction(argumentString)

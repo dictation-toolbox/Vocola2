@@ -309,6 +309,7 @@ Commands" are activated.
 
         self.load(self.gramSpec)
         self.activateAll()
+        print('Started Vocola.')
 
     
     def gotBegin(self, moduleInfo):
@@ -751,7 +752,7 @@ def vocolaMicOnCallback():
         compile_changed()
         changes = output_changes()
         if changes:
-            print(f'_vocola_main, vocolaMicOnCallback, changes: {bool(changes)}')
+            print(f'_vocola_main, vocolaMicOnCallback, changes: {changes}')
 
 ###########################################################################
 #                                                                         #
