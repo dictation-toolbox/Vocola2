@@ -35,7 +35,10 @@ import sys
 import traceback  # for debugging traceback code in handle_error
 
 import natlink
+from dtactions.uniactions import uactions
+from dtactions import sendkeys
 from vocola2.extensions import vocola_ext_keys
+
 ##
 ## Global variables:
 ##
@@ -117,7 +120,7 @@ def to_long(string):
 def do_flush(functional_context, buffer):
     if functional_context:
         raise VocolaRuntimeError(
-            'attempt to call Unimacro, Dragon, or a Vocola extension ' +
+            'attempt to call Uniactions, Dragon, or a Vocola extension ' +
             'procedure in a functional context!')
     if buffer != '':
         # new_keys = convert_keys(buffer)
@@ -213,7 +216,7 @@ def call_Dragon(function_name, argument_types, arguments):
     #print '[' + script + ']'
     try:
         if function_name == "SendDragonKeys":
-            send_input(convert_keys(arguments[0]))
+            sendkeys.sendkeys(convert_keys(arguments[0]))
         elif function_name == "ShiftKey":
             dragon_prefix = script + chr(10)
         else:
@@ -227,41 +230,21 @@ def call_Dragon(function_name, argument_types, arguments):
         raise VocolaRuntimeError(m) from exc
 
 ##
-## Unimacro built-in:
+## Uniactions built-in:
 ##
 
-# attempt to import Unimacro, suppressing errors, and noting success status:
-unimacro_available = False
-unimacroactions = None
-try:
-    from dtactions import unimacroactions
-    unimacro_available = True
-except ImportError:
-    pass
-except OSError:
-    # print 'cannot open Unimacro actions file'
-    pass
-
-def call_Unimacro(argumentString):
-    if unimacro_available:
-        #print '[' + argumentString + ']'
-        try:
-            unimacroactions.doAction(argumentString)
-        except Exception as exc:
-            # traceback.print_exc()
-            m = "when Vocola called Unimacro to execute:\n" \
-                + '        Unimacro(' + argumentString + ')\n' \
-                + '    Unimacro reported the following error:\n' \
-                + '        ' + type(exc).__name__ + ": " + str(exc)
-                
-            raise VocolaRuntimeError(m) from exc
-    else:
-        m = '\n'.join(['Unimacro call failed because ',
-                       '    the link with Unimacro is unavailable.',
-                       '    You can fix this by switching on the option:',
-                       '    "Vocola takes Unimacro Actions" in the',
-                       '    program "Configure Natlink via GUI".'])
-        raise VocolaRuntimeError(m)
+def call_Uniactions(argumentString):
+    #print '[' + argumentString + ']'
+    try:
+        uactions.doAction(argumentString)
+    except Exception as exc:
+        # traceback.print_exc()
+        m = "when Vocola called Uniactions to execute:\n" \
+            + '        Uniactions(' + argumentString + ')\n' \
+            + '    Uniactions reported the following error:\n' \
+            + '        ' + type(exc).__name__ + ": " + str(exc)
+            
+        raise VocolaRuntimeError(m) from exc
 
 
 

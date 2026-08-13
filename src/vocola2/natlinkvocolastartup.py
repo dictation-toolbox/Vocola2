@@ -1,7 +1,8 @@
-"""this module performs several Vocola/Unimacro interaction actions at Natlink startup time
+"""this module performs several Vocola/Uniactions interaction actions at Natlink startup time
 
 should be called from Vocola_main
 2021-07-15, QH
+Try to update: 2026-04-30
 """
 #pylint:disable=C0209
 import os               # access to file information
@@ -21,40 +22,40 @@ def start():
     """starting two features of Vocola
     """
     # print('--- natlinkvocolastartup starting...')
-    updateUnimacroHeaderIfNeeded()
+    updateUniactionsHeaderIfNeeded()
     create_new_language_subdirectory_if_needed()
 ##
-## Update user's copy of Unimacro.vch if a more recent version is
+## Update user's copy of Uniactions.vch if a more recent version is
 ## available
 ##
 
-def updateUnimacroHeaderIfNeeded():
-    """check the Unimacro header for include Unimacro.vch
+def updateUniactionsHeaderIfNeeded():
+    """check the Uniactions header for include Uniactions.vch
     """
-    if not status.getVocolaTakesUnimacroActions(): 
+    if not status.getVocolaTakesUniactions(): 
         return
         
     destDir              = status.getVocolaUserDirectory()
-    unimacroDir          = status.getUnimacroDirectory()
+    uniactionsDir          = status.getDtactionsDirectory()
     # coreFolder           = os.path.split(__file__)[0]
     # sourceDir            = os.path.normpath(os.path.join(coreFolder, "..", "..", "..",
-    #                                     "Unimacro", 'vocola_compatibility'))
-    sourceDir            = os.path.join(unimacroDir, 'vocola_compatibility')
-    destPath             = os.path.join(destDir,   'Unimacro.vch')
-    sourcePath           = os.path.join(sourceDir, 'Unimacro.vch')
-    # print(f'updateUnimacroHeaderIfNeeded\n\tsourcePath: {sourcePath}\n\tdestPath:  {destPath}\n=====')
+    #                                     "Uniactions", 'vocola_compatibility'))
+    sourceDir            = os.path.join(uniactionsDir, 'vocola_compatibility')
+    destPath             = os.path.join(destDir,   'Uniactions.vch')
+    sourcePath           = os.path.join(sourceDir, 'Uniactions.vch')
+    # print(f'updateUniactionsHeaderIfNeeded\n\tsourcePath: {sourcePath}\n\tdestPath:  {destPath}\n=====')
     sourceTime, destTime = vocolaGetModTime(sourcePath), \
                            vocolaGetModTime(destPath)
 
     if not (sourceTime or destTime):
         print("""\n
-Error: The option "Vocola Takes Unimacro Actions" is switched on, but
-no file "Unimacro.vch" is found.
+Error: The option "Vocola Takes Uniactions Actions" is switched on, but
+no file "Uniactions.vch" is found.
 
-Please fix the configuration of Natlink/Vocola/Unimacro and restart
+Please fix the configuration of Natlink/Vocola/Uniactions and restart
 Dragon.  Either ensure the source file is at:
     "%s",
-or switch off the option "Vocola Takes Unimacro Actions".
+or switch off the option "Vocola Takes Uniactions Actions".
 """% sourceDir, file=sys.stderr)
         return
         
@@ -63,16 +64,16 @@ or switch off the option "Vocola Takes Unimacro Actions".
             shutil.copyfile(sourcePath, destPath)
         except OSError:
             print("""\n
-Warning: Could not copy example "Unimacro.vch" to:
+Warning: Could not copy example "Uniactions.vch" to:
     "%s".
 
-There is a valid "Unimacro.vch" available, but a newer file is
+There is a valid "Uniactions.vch" available, but a newer file is
 available at: "%s".
 
-Please fix the configuration of Natlink/Vocola/Unimacro and restart
+Please fix the configuration of Natlink/Vocola/Uniactions and restart
 Dragon, if you want to use the updated version of this file."""% (destDir, sourceDir), file=sys.stderr)
         else:
-            print('Succesfully copied "Unimacro.vch" from\n\t"%s" to\n\t"%s".'% (sourceDir, destDir))
+            print('Succesfully copied "Uniactions.vch" from\n\t"%s" to\n\t"%s".'% (sourceDir, destDir))
 
 # Returns the modification time of a file or 0 if the file does not exist:
 def vocolaGetModTime(file):

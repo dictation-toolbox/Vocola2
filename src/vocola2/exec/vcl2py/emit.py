@@ -397,8 +397,12 @@ def emit_call(buffer, functional, call, indent):
             emit_call_if(buffer, functional, call, indent)
         elif callName == "Repeat":
             emit_call_repeat(buffer, functional, call, indent)
+        # # CHANGE ALL Unimacro to Uniactions (for release to 4.1.0 and Natlink to 6.0.0)
         elif callName == "Unimacro":
-            emit_call_Unimacro(buffer, functional, call, indent)
+            print('Call to "Unimacro" becoming obsolete, change eventually "Usc" (Uniactions shorthand command)')
+            emit_call_usc(buffer, functional, call, indent)
+        elif callName == "Usc":
+            emit_call_usc(buffer, functional, call, indent)
         elif callName == "When":
             emit_call_when(buffer, functional, call, indent)
         else: implementation_error("Unknown Vocola function: '" + callName + "'")
@@ -498,10 +502,10 @@ def emit_call_eval_template(buffer, functional, call, indent):
     arguments = emit_arguments(call, "eval_template", indent)
     emit(indent, buffer + " += eval_template(" + arguments + ")\n")
 
-def emit_call_Unimacro(buffer, functional, call, indent):
+def emit_call_usc(buffer, functional, call, indent):
     emit_flush(buffer, functional, indent)
-    arguments = emit_arguments(call, "unimacro", indent)
-    emit(indent, "call_Unimacro(" + arguments + ")\n")
+    arguments = emit_arguments(call, "usc", indent)
+    emit(indent, "call_usc(" + arguments + ")\n")
 
 # ---------------------------------------------------------------------------
 # Utilities for transforming command terms into Natlink rules

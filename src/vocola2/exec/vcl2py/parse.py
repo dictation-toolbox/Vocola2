@@ -94,6 +94,7 @@ def parse_input(in_file, in_folder, extension_functions, debug):
 # ---------------------------------------------------------------------------
 # Built in Vocola functions with (minimum number of arguments, maximum
 # number of arguments):
+# added Usc (Uniactions Shorthand Command), keep Unimacro for messages previous verion.
 
 Vocola_functions = {
                      "Eval"         : [1,1],
@@ -101,6 +102,7 @@ Vocola_functions = {
                      "If"           : [2,3],
                      "Repeat"       : [2,2],
                      "Unimacro"     : [1,1],
+                     "Usc"          : [1,1],
                      "When"         : [2,3],
                    }
 
