@@ -96,7 +96,7 @@ show help for <command> = Help("scrptref/$1.htm");
     Eval                = Eval              |
     Eval Template       = EvalTemplate      |
     Repeat              = Repeat            |
-    Unimacro            = Unimacro
+    Uniactions            = Uniactions
 );
 
 show help for <command2> = 

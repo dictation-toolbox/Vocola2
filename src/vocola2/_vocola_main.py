@@ -42,7 +42,7 @@ import shutil
 import subprocess
 import re
 import logging
-from importlib.metadata import version
+from importlib.metadata import version, PackageNotFoundError
 from pathlib import Path
 import natlink
 from natlinkcore import natlinkutils
@@ -53,14 +53,17 @@ from vocola2.exec.vcl2py.main import main_routine     # main.main_routine  compi
 
 
 #we don't know if it will be vocola2 or vocola or None 
-#depending on how this package is installed.  So 
+#depending on how this package is installed or run.  So 
 #check the path if no __package__ specified.
+
+
 packageName = __package__ if __package__ is not None else \
     Path(__file__).parent.name
 
-thisVersion=version(packageName)  #get the version of this package.
-thisDir = os.path.split(__file__)[0]
+loaded_as_package = __package__ is not None
 
+thisVersion = version(packageName) if loaded_as_package else "unknown (not loaded as package)" 
+thisDir = os.path.split(__file__)[0]
 ##########################################################################
 #                                                                        #
 # Configuration                                                           #
@@ -74,9 +77,18 @@ try:
     Quintijn_installer = True
     status             = natlinkstatus.NatlinkStatus()
 
+    if not loaded_as_package:
+        try:
+            vocola2Version=version("vocola2")
+        except PackageNotFoundError:
+            vocola2Version = "unknown"
+        thisVersion += f"\nvocola2 version known to be: {vocola2Version}"
+
     ## when natlinkmain is already there, the Logger and Config variables are ignored...
     Logger = logging.getLogger('natlink')
-    Logger.debug(f'checking if Vocola is enabled')
+    Logger.debug(f"Vocola starting version: {thisVersion}\nSource file {__file__}")
+
+    Logger.debug('checking if Vocola is enabled')
     Config = config.NatlinkConfig.from_first_found_file(loader.config_locations())
     natlinkmain = loader.NatlinkMain(Logger, Config)
     # natlinkmain.setup_logger()
@@ -107,11 +119,14 @@ try:
     language           = status.language
     if language != 'enx':
         print(f'    language: "{language}"')
-        if status.getVocolaTakesLanguages():
             # addition to comment line in new .vcl files () (self.openCommandFile)
-            VocolaUserLanguageDirectory = os.path.join(VocolaUserDirectory, language)
-            if not os.path.exists(VocolaUserLanguageDirectory):
-                os.mkdir(VocolaUserLanguageDirectory)
+        VocolaUserLanguageDirectory = os.path.join(VocolaUserDirectory, language)
+        if not os.path.exists(VocolaUserLanguageDirectory):
+            os.mkdir(VocolaUserLanguageDirectory)
+            print(f'*** Created vocola commands directory for language "{language}.')
+            print('    Please move your vocola command files to this directory,')
+            print('    when you had them in the Vocola commands directory:')
+            print(f'    "{VocolaUserDirectory}" before. ')
                 
     ## perform init actions: 
     natlinkvocolastartup.start()
@@ -294,6 +309,7 @@ Commands" are activated.
 
         self.load(self.gramSpec)
         self.activateAll()
+        print('Started Vocola.')
 
     
     def gotBegin(self, moduleInfo):
@@ -460,10 +476,11 @@ Commands" are activated.
 
         path = self.FindExistingCommandFile(file)
         if not path:
-            after_comment = self.get_after_comment_new_vcl_file()
+            before_comment, after_comment = self.get_before_after_comment_new_vcl_file()
             path = commandFolder + '\\' + file
             rwfile = readwritefile.ReadWriteFile()
-            rwfile.writeAnything(path, f'# {comment}{after_comment}\n')
+            ## before_comment and after_comment are empty or and with \n...
+            rwfile.writeAnything(path, f'{before_comment}# {comment}\n{after_comment}')
             
             # with open(path, 'w', encoding='ascii') as fp:
             #     fp.write(f'# {comment} \n\n')
@@ -485,21 +502,23 @@ Commands" are activated.
         #    os.spawnv(os.P_NOWAIT, prog, [prog, path])
         natlink.execScript("AppBringUp \"" + path + "\", \"" + path + "\"")
 
-    def get_after_comment_new_vcl_file(self):
+    def get_before_after_comment_new_vcl_file(self):
         """get language dependent and unimacro actions dependent start
         of a new vcl command file
         """
         language_comment_addition = ''  # at new command file
-        include_unimacro_line = ''
-        if status.getVocolaTakesLanguages():
-            if language != 'enx':
-                language_comment_addition = f' (language: {language})'
+        include_uniactions_line = ''
+        language_comment_addition = ''
+        # if status.getVocolaTakesLanguages():
+        if language != 'enx':
+            language_comment_addition = f'# (language: {language})'
 
-        if status.getVocolaTakesUnimacroActions():
-            include_unimacro_line = 'include Unimacro.vch;\n'
-            if status.getVocolaTakesLanguages() and language != 'enx':
-                include_unimacro_line = 'include ..\\Unimacro.vch;\n'
-        return f'{language_comment_addition}\n{include_unimacro_line}\n'
+        if status.getVocolaTakesUniactions():
+            include_uniactions_line = 'include Uniactions.vch;\n'
+            # if status.getVocolaTakesLanguages() and language != 'enx':
+            if language != 'enx':
+                include_uniactions_line = 'include ..\\Uniactions.vch;\n'
+        return f'{include_uniactions_line}', f'{language_comment_addition}\n'
 
 ###########################################################################
 #                                                                         #
@@ -514,7 +533,7 @@ may_have_compiled = False  #
 # Run Vocola compiler, converting command files from "inputFileOrFolder"
 # and writing output to Natlink/MacroSystem
 def compile_Vocola(inputFileOrFolder, force=None):
-    global may_have_compiled, compiler_error
+    global may_have_compiled   # compiler_error
     force = force or False
     may_have_compiled = True
 
@@ -733,7 +752,7 @@ def vocolaMicOnCallback():
         compile_changed()
         changes = output_changes()
         if changes:
-            print(f'_vocola_main, vocolaMicOnCallback, changes: {bool(changes)}')
+            print(f'_vocola_main, vocolaMicOnCallback, changes: {changes}')
 
 ###########################################################################
 #                                                                         #
